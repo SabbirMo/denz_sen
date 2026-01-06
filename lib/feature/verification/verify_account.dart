@@ -139,12 +139,12 @@ class _VerifyAccountState extends State<VerifyAccount> {
               ),
               AppSpacing.h24,
               CustomButton(
-                onTap: _isOtpFilled
+                onPressed: _isOtpFilled
                     ? () {
                         debugPrint('OTP Verified');
                       }
                     : null,
-                title: 'Verify',
+                buttonText: 'Verify',
                 backgroundColor: _isOtpFilled
                     ? AppColors.primaryColor
                     : AppColors.grey.withValues(alpha: 0.5),

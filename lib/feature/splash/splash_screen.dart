@@ -1,6 +1,7 @@
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
+import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/feature/auth/signin/signin_screen.dart';
 import 'package:denz_sen/feature/auth/singup/signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -128,47 +129,6 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class CustomButton extends StatelessWidget {
-  const CustomButton({
-    super.key,
-    required this.buttonText,
-    required this.onPressed,
-    this.icon,
-    this.width,
-  });
-
-  final String buttonText;
-  final VoidCallback onPressed;
-  final IconData? icon;
-  final double? width;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        padding: EdgeInsets.all(12),
-        width: width ?? double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              buttonText,
-              style: AppStyle.book16.copyWith(color: AppColors.white),
-            ),
-            AppSpacing.w10,
-            if (icon != null) Icon(icon, color: AppColors.white),
-          ],
-        ),
       ),
     );
   }

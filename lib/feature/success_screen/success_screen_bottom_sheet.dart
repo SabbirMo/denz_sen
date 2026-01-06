@@ -1,14 +1,21 @@
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
+import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/feature/auth/signin/signin_screen.dart';
-import 'package:denz_sen/feature/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 
+enum SuccessType { passwordChanged, reportSubmitted }
+
 class SuccessScreenBottomSheet {
-  static void show(BuildContext context) {
+  static void show(
+    BuildContext context, {
+    SuccessType type = SuccessType.passwordChanged,
+  }) {
+    final bool isReportSubmitted = type == SuccessType.reportSubmitted;
+
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -38,7 +45,9 @@ class SuccessScreenBottomSheet {
                 AppSpacing.h16,
 
                 Text(
-                  'Your password has been changed successfully!',
+                  isReportSubmitted
+                      ? 'Your report has been submitted successfully!'
+                      : 'Your password has been changed successfully!',
                   style: AppStyle.book14,
                 ),
                 AppSpacing.h18,
@@ -50,13 +59,17 @@ class SuccessScreenBottomSheet {
                 AppSpacing.h20,
 
                 CustomButton(
-                  buttonText: "Return to Login",
+                  buttonText: isReportSubmitted ? "Okay" : "Return to Login",
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const SignInScreen(),
-                      ),
-                    );
+                    if (isReportSubmitted) {
+                      Navigator.of(context).pop();
+                    } else {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const SignInScreen(),
+                        ),
+                      );
+                    }
                   },
                 ),
                 AppSpacing.h26,

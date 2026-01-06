@@ -6,6 +6,7 @@ import 'package:denz_sen/core/widget/custom_filed.dart';
 import 'package:denz_sen/core/widget/header_section.dart';
 import 'package:denz_sen/feature/auth/forgot_password/forgot_password_bottom_sheet.dart';
 import 'package:denz_sen/feature/auth/singup/signup_screen.dart';
+import 'package:denz_sen/feature/home/screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,12 +30,12 @@ class SignInScreen extends StatelessWidget {
                   CustomField(
                     title: 'Email',
                     hintText: 'email',
-                    prefixIcon: SvgPicture.asset('assets/icons/sms.svg'),
+                    prefixIcon: SvgPicture.asset('assets/svgs/sms.svg'),
                   ),
                   CustomField(
                     title: 'Password',
                     hintText: 'password',
-                    prefixIcon: SvgPicture.asset('assets/icons/lock.svg'),
+                    prefixIcon: SvgPicture.asset('assets/svgs/lock.svg'),
                     suffixIcon: Icon(Icons.visibility_off_outlined),
                   ),
                   Align(
@@ -56,8 +57,14 @@ class SignInScreen extends StatelessWidget {
                   ),
                   AppSpacing.h22,
                   CustomButton(
-                    title: 'Sign In',
-                    onTap: () {},
+                    buttonText: 'Sign In',
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    },
                     width: double.infinity,
                   ),
                   AppSpacing.h20,

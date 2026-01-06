@@ -1,4 +1,5 @@
 import 'package:denz_sen/core/theme/app_colors.dart';
+import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,50 +7,46 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
-    required this.onTap,
-    required this.title,
-    this.shadow = true,
-    this.backgroundColor,
-    this.height,
+    required this.buttonText,
+    required this.onPressed,
+    this.icon,
     this.width,
-    this.horizontalPadding,
-    this.verticalPadding,
+    this.backgroundColor,
+    this.textColor,
     this.isLoading = false,
   });
 
-  final Function()? onTap;
-  final String title;
-  final bool shadow;
-  final Color? backgroundColor;
-
+  final String buttonText;
+  final Function()? onPressed;
+  final IconData? icon;
   final double? width;
-  final double? height;
-
-  final double? horizontalPadding;
-  final double? verticalPadding;
+  final Color? backgroundColor;
+  final Color? textColor;
   final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: isLoading ? null : onTap,
+      onTap: isLoading ? null : onPressed,
       child: Container(
-        height: height ?? 48.h,
-        width: width,
-        padding: EdgeInsets.symmetric(
-          horizontal: horizontalPadding ?? 16.w,
-          vertical: verticalPadding ?? 10.h,
-        ),
+        padding: EdgeInsets.all(12),
+        width: width ?? double.infinity,
         decoration: BoxDecoration(
           color: backgroundColor ?? AppColors.primaryColor,
           borderRadius: BorderRadius.circular(8.r),
         ),
-        child: Center(
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: AppStyle.medium16.copyWith(color: AppColors.white),
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              buttonText,
+              style: AppStyle.book16.copyWith(
+                color: textColor ?? AppColors.white,
+              ),
+            ),
+            AppSpacing.w10,
+            if (icon != null) Icon(icon, color: AppColors.white),
+          ],
         ),
       ),
     );

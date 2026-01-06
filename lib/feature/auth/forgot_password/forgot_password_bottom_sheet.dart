@@ -55,13 +55,13 @@ class ForgotPasswordBottomSheet {
                     ),
                     AppSpacing.h12,
                     CustomButton(
-                      onTap: () {
+                      onPressed: () {
                         Navigator.pop(
                           context,
                         ); // Close current bottom sheet first
                         EmailOtpBottomSheet.show(context);
                       },
-                      title: 'Send Email',
+                      buttonText: 'Send Email',
                     ),
                     AppSpacing.h26,
                   ],

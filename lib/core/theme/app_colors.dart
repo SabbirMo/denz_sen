@@ -12,4 +12,9 @@ class AppColors {
   static const border = Color(0xFFEFEDEC); //#EFEDEC
 
   static const primaryColor = Color(0xFF507493); //#507493
+
+  static const offWhite = Color(0xFFF8F7F7); //#F8F7F7
+
+  static const red = Color(0xFFD15151); //#D15151
+  static const green = Color(0xFF34B570); //#34B570
 }

@@ -1,8 +1,8 @@
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
+import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/core/widget/custom_filed.dart';
-import 'package:denz_sen/feature/splash/splash_screen.dart';
 import 'package:denz_sen/feature/success_screen/success_screen_bottom_sheet.dart';
 import 'package:denz_sen/feature/verification/verification_page.dart';
 import 'package:flutter/material.dart';

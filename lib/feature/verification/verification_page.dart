@@ -202,15 +202,16 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                   ),
                 ),
                 AppSpacing.h28,
+
                 CustomButton(
-                  onTap: _isOtpFilled
+                  onPressed: _isOtpFilled
                       ? () {
                           Navigator.of(context).pop();
 
                           SuccessScreenBottomSheet.show(context);
                         }
                       : null,
-                  title: 'Verify',
+                  buttonText: 'Verify',
                   backgroundColor: _isOtpFilled
                       ? AppColors.primaryColor
                       : AppColors.grey.withValues(alpha: 0.5),

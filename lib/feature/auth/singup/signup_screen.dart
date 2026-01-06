@@ -30,35 +30,35 @@ class SignupScreen extends StatelessWidget {
                   CustomField(
                     title: 'User Name',
                     hintText: 'username',
-                    prefixIcon: SvgPicture.asset('assets/icons/profile.svg'),
+                    prefixIcon: SvgPicture.asset('assets/svgs/profile.svg'),
                   ),
                   CustomField(
                     title: 'Email',
                     hintText: 'email',
-                    prefixIcon: SvgPicture.asset('assets/icons/sms.svg'),
+                    prefixIcon: SvgPicture.asset('assets/svgs/sms.svg'),
                   ),
                   CustomField(
                     title: 'COP ID',
                     hintText: 'COP ID',
-                    prefixIcon: SvgPicture.asset('assets/icons/cop.svg'),
+                    prefixIcon: SvgPicture.asset('assets/svgs/cop.svg'),
                   ),
                   CustomField(
                     title: 'Password',
                     hintText: 'password',
-                    prefixIcon: SvgPicture.asset('assets/icons/lock.svg'),
+                    prefixIcon: SvgPicture.asset('assets/svgs/lock.svg'),
                     suffixIcon: Icon(Icons.visibility_off_outlined),
                   ),
                   CustomField(
                     title: 'Confirm Password',
                     hintText: 'confirm password',
-                    prefixIcon: SvgPicture.asset('assets/icons/lock.svg'),
+                    prefixIcon: SvgPicture.asset('assets/svgs/lock.svg'),
                     suffixIcon: Icon(Icons.visibility_off_outlined),
                   ),
 
                   AppSpacing.h12,
                   CustomButton(
-                    title: 'Sign Up',
-                    onTap: () {
+                    buttonText: 'Sign Up',
+                    onPressed: () {
                       VerificationPage.show(context);
                     },
                   ),

@@ -8,7 +8,6 @@ class AppStyle {
     scaffoldBackgroundColor: AppColors.white,
     primaryColor: AppColors.white,
     appBarTheme: AppBarTheme(
-      centerTitle: true,
       backgroundColor: AppColors.white,
       scrolledUnderElevation: 0,
       elevation: 0,
@@ -49,6 +48,12 @@ class AppStyle {
     fontWeight: FontWeight.bold,
     color: AppColors.black,
   );
+  static final semiBook20 = TextStyle(
+    fontSize: 20.sp,
+    fontFamily: 'CooperHewittBookSemiBold',
+    fontWeight: FontWeight.bold,
+    color: AppColors.black,
+  );
 
   static final semiBook16 = TextStyle(
     fontSize: 16.sp,
@@ -56,11 +61,23 @@ class AppStyle {
     fontWeight: FontWeight.bold,
     color: AppColors.black,
   );
+  static final semiBook14 = TextStyle(
+    fontSize: 14.sp,
+    fontFamily: 'CooperHewittBookSemiBold',
+    fontWeight: FontWeight.bold,
+    color: AppColors.white,
+  );
 
   static final medium16 = TextStyle(
     fontSize: 16.sp,
     fontFamily: 'CooperHewittBookMedium',
     fontWeight: FontWeight.bold,
     color: AppColors.black,
+  );
+  static final medium14 = TextStyle(
+    fontSize: 14.sp,
+    fontFamily: 'CooperHewittBookMedium',
+    fontWeight: FontWeight.bold,
+    color: AppColors.greyText,
   );
 }

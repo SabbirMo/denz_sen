@@ -14,6 +14,8 @@ class CustomField extends StatelessWidget {
     this.type,
     this.maxLines = 1,
     this.title,
+    this.readOnly = false,
+    this.onTap,
   });
   final String? hintText;
   final TextEditingController? controller;
@@ -23,6 +25,8 @@ class CustomField extends StatelessWidget {
   final TextInputType? type;
   final int maxLines;
   final String? title;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +43,8 @@ class CustomField extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: TextFormField(
+            readOnly: readOnly,
+            onTap: onTap,
             controller: controller,
             cursorColor: AppColors.primaryColor,
             keyboardType: type,
