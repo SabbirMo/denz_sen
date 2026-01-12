@@ -190,46 +190,43 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
 
-            SizedBox(
-              height: 160.h,
-              child: GridView(
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12.h,
-                  crossAxisSpacing: 12.w,
-                  childAspectRatio: 2.8,
-                ),
-                children: [
-                  CustomGridCard(
-                    imagePath: 'assets/svgs/information.svg',
-                    title: 'Submit Report',
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const SubmitReportScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  CustomGridCard(
-                    imagePath: 'assets/svgs/folder.svg',
-                    title: 'My Cases',
-                  ),
-                  CustomGridCard(
-                    imagePath: 'assets/svgs/radio.svg',
-                    title: 'COP Portal',
-                  ),
-                  CustomGridCard(
-                    imagePath: 'assets/svgs/message.svg',
-                    title: 'My Messages',
-                    showBadge: true,
-                    badgeCount: 2,
-                  ),
-                ],
+            GridView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12.h,
+                crossAxisSpacing: 12.w,
+                childAspectRatio: 2.8,
               ),
+              children: [
+                CustomGridCard(
+                  imagePath: 'assets/svgs/information.svg',
+                  title: 'Submit Report',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SubmitReportScreen(),
+                      ),
+                    );
+                  },
+                ),
+                CustomGridCard(
+                  imagePath: 'assets/svgs/folder.svg',
+                  title: 'My Cases',
+                ),
+                CustomGridCard(
+                  imagePath: 'assets/svgs/radio.svg',
+                  title: 'COP Portal',
+                ),
+                CustomGridCard(
+                  imagePath: 'assets/svgs/message.svg',
+                  title: 'My Messages',
+                  showBadge: true,
+                  badgeCount: 2,
+                ),
+              ],
             ),
-            AppSpacing.h20,
             Text('Active Dispatches', style: AppStyle.semiBook16),
             AppSpacing.h8,
             Container(

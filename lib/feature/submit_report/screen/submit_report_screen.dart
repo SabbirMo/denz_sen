@@ -103,7 +103,7 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
                 hintText: 'Enter city',
                 suffixIcon: Icon(Icons.location_on_outlined),
               ),
-              CustomField(title: 'Zip Code', hintText: 'Enter zip code'),
+              CustomField(title: 'Zip Code', hintText: 'Enter zip code', type: TextInputType.number,),
               CustomField(
                 title: 'Detail of Event',
                 hintText: 'Enter details of the event',

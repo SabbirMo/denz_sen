@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
@@ -44,20 +46,27 @@ class SuccessScreenBottomSheet {
                 ),
                 AppSpacing.h16,
 
-                Text(
-                  isReportSubmitted
-                      ? 'Your report has been submitted successfully!'
-                      : 'Your password has been changed successfully!',
-                  style: AppStyle.book14,
-                ),
+                if (isReportSubmitted == false)
+                  Text(
+                    'Your password has been changed successfully!',
+                    style: AppStyle.book14,
+                  ),
+
                 AppSpacing.h18,
 
                 RepaintBoundary(
                   child: LottieBuilder.asset('assets/lottie/tick_green.json'),
                 ),
 
-                AppSpacing.h20,
+                AppSpacing.h10,
 
+                if (isReportSubmitted == true) ...[
+                  Text('Report Submitted', style: AppStyle.semiBook20),
+                  AppSpacing.h4,
+                  Text('Your tip was submitted successfully.', style: AppStyle.book14),
+                ] else
+                  ...[],
+                AppSpacing.h20,
                 CustomButton(
                   buttonText: isReportSubmitted ? "Okay" : "Return to Login",
                   onPressed: () {
