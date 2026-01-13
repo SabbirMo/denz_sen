@@ -1,11 +1,24 @@
 import 'package:denz_sen/core/theme/app_style.dart';
+import 'package:denz_sen/feature/auth/new_password/provider/new_password_provider.dart';
+import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
+import 'package:denz_sen/feature/auth/singup/provider/singup_provider.dart';
 import 'package:denz_sen/feature/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SigninProvider()),
+        ChangeNotifierProvider(create: (_) => SingupProvider()),
+        ChangeNotifierProvider(create: (_) => NewPasswordProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

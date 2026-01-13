@@ -2,7 +2,7 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
-import 'package:denz_sen/feature/auth/new_password/new_password_screen.dart';
+import 'package:denz_sen/feature/auth/new_password/screen/new_password_screen.dart';
 import 'package:denz_sen/feature/verification/verification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
