@@ -60,122 +60,131 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                SizedBox(
-                  width: 340.w,
-                  height: 200.h,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(
-                        color: AppColors.black.withValues(alpha: .4),
-                        width: 1.w,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        children: [
+                          SizedBox(
+                            width: 340.w,
+                            height: 200.h,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16.r),
+                                border: Border.all(
+                                  color: AppColors.black.withValues(alpha: .4),
+                                  width: 1.w,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(1.w),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  child: Image.asset(
+                                    'assets/images/maps.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          Positioned(
+                            bottom: 12.h,
+                            left: 12.w,
+                            child: GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Icon(
+                                  Icons.camera_alt_sharp,
+                                  size: 24.w,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(1.w),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16.r),
-                        child: Image.asset(
-                          'assets/images/maps.png',
-                          fit: BoxFit.cover,
+                      AppSpacing.h20,
+                      GridView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12.h,
+                          crossAxisSpacing: 12.w,
+                          childAspectRatio: 2.8,
+                        ),
+                        children: [
+                          CustomGridCard(
+                            imagePath: 'assets/svgs/information.svg',
+                            title: 'Submit Report',
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const SubmitReportScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          CustomGridCard(
+                            imagePath: 'assets/svgs/folder.svg',
+                            title: 'My Cases',
+                          ),
+                          CustomGridCard(
+                            imagePath: 'assets/svgs/radio.svg',
+                            title: 'COP Portal',
+                          ),
+                          CustomGridCard(
+                            imagePath: 'assets/svgs/message.svg',
+                            title: 'My Messages',
+                            showBadge: true,
+                            badgeCount: 2,
+                          ),
+                        ],
+                      ),
+                      AppSpacing.h20,
+                      Text('Active Dispatches', style: AppStyle.semiBook16),
+                      AppSpacing.h8,
+                      Container(
+                        padding: EdgeInsets.all(16.w),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.offWhite,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Column(
+                          children: [
+                            Image.asset('assets/icons/fileFace.png'),
+                            AppSpacing.h8,
+                            Text(
+                              'No Dispatches Yet',
+                              style: AppStyle.medium14.copyWith(
+                                fontSize: 12.sp,
+                                color: AppColors.greyText,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-
-                Positioned(
-                  bottom: 12.h,
-                  left: 12.w,
-                  child: GestureDetector(
-                    onTap: _pickImage,
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Icon(
-                        Icons.camera_alt_sharp,
-                        size: 24.w,
-                        color: AppColors.primaryColor,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            GridView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12.h,
-                crossAxisSpacing: 12.w,
-                childAspectRatio: 2.8,
               ),
-              children: [
-                CustomGridCard(
-                  imagePath: 'assets/svgs/information.svg',
-                  title: 'Submit Report',
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const SubmitReportScreen(),
-                      ),
-                    );
-                  },
-                ),
-                CustomGridCard(
-                  imagePath: 'assets/svgs/folder.svg',
-                  title: 'My Cases',
-                ),
-                CustomGridCard(
-                  imagePath: 'assets/svgs/radio.svg',
-                  title: 'COP Portal',
-                ),
-                CustomGridCard(
-                  imagePath: 'assets/svgs/message.svg',
-                  title: 'My Messages',
-                  showBadge: true,
-                  badgeCount: 2,
-                ),
-              ],
-            ),
-            Text('Active Dispatches', style: AppStyle.semiBook16),
-            AppSpacing.h8,
-            Container(
-              padding: EdgeInsets.all(16.w),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.offWhite,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Column(
-                children: [
-                  Image.asset('assets/icons/fileFace.png'),
-                  AppSpacing.h8,
-                  Text(
-                    'No Dispatches Yet',
-                    style: AppStyle.medium14.copyWith(
-                      fontSize: 12.sp,
-                      color: AppColors.greyText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Spacer(),
-            SafeArea(
-              child: Container(
+              AppSpacing.h12,
+              Container(
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   color: AppColors.primaryColor,
@@ -194,7 +203,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     SliderTheme(
                       data: SliderThemeData(
                         trackHeight: 6.h,
-                        activeTrackColor: AppColors.white.withValues(alpha: 0.2),
+                        activeTrackColor: AppColors.white.withValues(
+                          alpha: 0.2,
+                        ),
                         inactiveTrackColor: AppColors.white.withValues(
                           alpha: 0.2,
                         ),
@@ -231,13 +242,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-
 }
 
 class CustomGridCard extends StatelessWidget {

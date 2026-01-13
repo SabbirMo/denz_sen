@@ -48,7 +48,6 @@ class CustomField extends StatelessWidget {
             controller: controller,
             cursorColor: AppColors.primaryColor,
             keyboardType: type,
-            focusNode: FocusNode(),
             autofocus: false,
             textInputAction: TextInputAction.next,
             maxLines: maxLines,
