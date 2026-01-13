@@ -11,6 +11,7 @@ class AppStyle {
       backgroundColor: AppColors.white,
       scrolledUnderElevation: 0,
       elevation: 0,
+      centerTitle: false,
     ),
   );
 

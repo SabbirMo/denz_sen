@@ -44,104 +44,27 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        toolbarHeight: 60.h,
+        automaticallyImplyLeading: false,
+        title: CustomHomeAppBar(
+          userName: 'Jack Tyler',
+          onLeaderboardTap: () {},
+          onSettingsTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingPage()),
+            );
+          },
+        ),
+      ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 26.r,
-                  backgroundImage: const AssetImage(
-                    'assets/images/profile.png',
-                  ),
-                ),
-                AppSpacing.w14,
-                GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierLabel: 'Close',
-                      builder: (context) {
-                        return Align(
-                          alignment: Alignment.topCenter,
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 58.h),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Container(
-                                margin: EdgeInsets.symmetric(horizontal: 20.w),
-                                padding: EdgeInsets.all(20.w),
-                                decoration: BoxDecoration(
-                                  color: AppColors.red.withValues(alpha: 0.7),
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Image.asset('assets/icons/alertIcon.png'),
-                                    AppSpacing.h12,
-                                    Text(
-                                      'Dispatch Alert!',
-                                      style: AppStyle.semiBook16.copyWith(
-                                        color: AppColors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    AppSpacing.h12,
-                                    Text(
-                                      'A dispatch in your area has been activated',
-                                      style: AppStyle.medium14.copyWith(
-                                        color: AppColors.white,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    AppSpacing.h12,
-                                    CustomButton(
-                                      buttonText: 'See Details',
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        DispatchAlertBottomSheet.show(context);
-                                      },
-                                      width: double.infinity,
-                                      backgroundColor: AppColors.white,
-                                      textColor: AppColors.red,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Hello 👋', style: AppStyle.medium14),
-                      Text('Jack Tyler', style: AppStyle.medium16),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    _circleIcon(Icons.leaderboard_outlined, () {}),
-                    AppSpacing.w10,
-                    _circleIcon(Icons.settings_outlined, () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const SettingPage()),
-                      );
-                    }),
-                  ],
-                ),
-              ],
-            ),
-            AppSpacing.h18,
-
             Stack(
               children: [
                 SizedBox(
@@ -251,60 +174,62 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Spacer(),
-            Container(
-              padding: EdgeInsets.all(14.w),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text('Dispatch View Range', style: AppStyle.semiBook14),
-                      Spacer(),
-                      Text('150', style: AppStyle.semiBook14),
-                    ],
-                  ),
-                  AppSpacing.h8,
-                  SliderTheme(
-                    data: SliderThemeData(
-                      trackHeight: 6.h,
-                      activeTrackColor: AppColors.white.withValues(alpha: 0.2),
-                      inactiveTrackColor: AppColors.white.withValues(
-                        alpha: 0.2,
-                      ),
-                      thumbColor: AppColors.white,
-                      thumbShape: SquareSliderThumbShape(
-                        thumbSize: 16,
-                        borderRadius: 4,
-                        thumbWidth: 24,
-                      ),
-                      overlayShape: RoundSliderOverlayShape(overlayRadius: 0),
+            SafeArea(
+              child: Container(
+                padding: EdgeInsets.all(14.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Text('Dispatch View Range', style: AppStyle.semiBook14),
+                        Spacer(),
+                        Text('150', style: AppStyle.semiBook14),
+                      ],
                     ),
-                    child: Slider(
-                      value: currentValue,
-                      min: 0,
-                      max: 500,
-                      onChanged: (double newValue) {
-                        setState(() {
-                          currentValue = newValue;
-                        });
-                      },
-                    ),
-                  ),
-                  AppSpacing.h10,
-                  Row(
-                    children: [
-                      Text(
-                        '${currentValue.toInt()} MI',
-                        style: AppStyle.semiBook14,
+                    AppSpacing.h8,
+                    SliderTheme(
+                      data: SliderThemeData(
+                        trackHeight: 6.h,
+                        activeTrackColor: AppColors.white.withValues(alpha: 0.2),
+                        inactiveTrackColor: AppColors.white.withValues(
+                          alpha: 0.2,
+                        ),
+                        thumbColor: AppColors.white,
+                        thumbShape: SquareSliderThumbShape(
+                          thumbSize: 16,
+                          borderRadius: 4,
+                          thumbWidth: 24,
+                        ),
+                        overlayShape: RoundSliderOverlayShape(overlayRadius: 0),
                       ),
-                      Spacer(),
-                      Text('500 MI', style: AppStyle.semiBook14),
-                    ],
-                  ),
-                ],
+                      child: Slider(
+                        value: currentValue,
+                        min: 0,
+                        max: 500,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            currentValue = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                    AppSpacing.h10,
+                    Row(
+                      children: [
+                        Text(
+                          '${currentValue.toInt()} MI',
+                          style: AppStyle.semiBook14,
+                        ),
+                        Spacer(),
+                        Text('500 MI', style: AppStyle.semiBook14),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -313,19 +238,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _circleIcon(IconData icon, VoidCallback? onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(8.w),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 24.w),
-      ),
-    );
-  }
 }
 
 class CustomGridCard extends StatelessWidget {
@@ -382,6 +294,124 @@ class CustomGridCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CustomHomeAppBar extends StatelessWidget {
+  const CustomHomeAppBar({
+    super.key,
+    this.userName = 'Jack Tyler',
+    this.profileImagePath = 'assets/images/profile.png',
+    this.onLeaderboardTap,
+    this.onSettingsTap,
+  });
+
+  final String userName;
+  final String profileImagePath;
+  final VoidCallback? onLeaderboardTap;
+  final VoidCallback? onSettingsTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 26.r,
+          backgroundImage: AssetImage(profileImagePath),
+        ),
+        AppSpacing.w14,
+        GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              barrierDismissible: true,
+              barrierLabel: 'Close',
+              builder: (context) {
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 58.h),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 20.w),
+                        padding: EdgeInsets.all(20.w),
+                        decoration: BoxDecoration(
+                          color: AppColors.red.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Image.asset('assets/icons/alertIcon.png'),
+                            AppSpacing.h12,
+                            Text(
+                              'Dispatch Alert!',
+                              style: AppStyle.semiBook16.copyWith(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            AppSpacing.h12,
+                            Text(
+                              'A dispatch in your area has been activated',
+                              style: AppStyle.medium14.copyWith(
+                                color: AppColors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            AppSpacing.h12,
+                            CustomButton(
+                              buttonText: 'See Details',
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                DispatchAlertBottomSheet.show(context);
+                              },
+                              width: double.infinity,
+                              backgroundColor: AppColors.white,
+                              textColor: AppColors.red,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Hello 👋', style: AppStyle.medium14),
+              Text(userName, style: AppStyle.medium16),
+            ],
+          ),
+        ),
+        const Spacer(),
+        Row(
+          children: [
+            _circleIcon(Icons.leaderboard_outlined, onLeaderboardTap),
+            AppSpacing.w10,
+            _circleIcon(Icons.settings_outlined, onSettingsTap),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _circleIcon(IconData icon, VoidCallback? onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 24.w),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
+import 'package:denz_sen/feature/setting_page/edit_information/edit_information_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,7 +33,12 @@ class _SettingPageState extends State<SettingPage> {
         actions: [
           IconButton(
             onPressed: () {
-              // Add action for settings if needed
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const EditInformationPage(),
+                ),
+              );
             },
             icon: Icon(Icons.edit_square),
           ),
