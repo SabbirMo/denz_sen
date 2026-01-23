@@ -81,4 +81,10 @@ class AppStyle {
     fontWeight: FontWeight.bold,
     color: AppColors.greyText,
   );
+  static final medium12 = TextStyle(
+    fontSize: 12.sp,
+    fontFamily: 'CooperHewittBookMedium',
+    fontWeight: FontWeight.bold,
+    color: AppColors.greyText,
+  );
 }

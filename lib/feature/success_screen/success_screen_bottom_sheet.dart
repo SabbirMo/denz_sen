@@ -1,4 +1,3 @@
-
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
@@ -62,7 +61,10 @@ class SuccessScreenBottomSheet {
                 if (isReportSubmitted == true) ...[
                   Text('Report Submitted', style: AppStyle.semiBook20),
                   AppSpacing.h4,
-                  Text('Your tip was submitted successfully.', style: AppStyle.book14),
+                  Text(
+                    'Your tip was submitted successfully.',
+                    style: AppStyle.book14,
+                  ),
                 ] else
                   ...[],
                 AppSpacing.h20,
