@@ -54,16 +54,24 @@ class SingupProvider extends ChangeNotifier {
         final data = jsonDecode(response.body);
         debugPrint('Sign up successful: $data');
 
-        // Save email to shared preferences if available in response
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        // Save email to shared preferences
         if (data['email'] != null) {
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('email', data['email']);
           debugPrint('Email saved: ${data['email']}');
         } else {
-          // If email not in response, save the one user provided
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('email', email);
           debugPrint('User email saved: $email');
+        }
+
+        // Save full_name to shared preferences
+        if (data['full_name'] != null) {
+          await prefs.setString('full_name', data['full_name']);
+          debugPrint('Full name saved: ${data['full_name']}');
+        } else {
+          await prefs.setString('full_name', fullName);
+          debugPrint('User full name saved: $fullName');
         }
       } else {
         try {

@@ -205,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               AppSpacing.h12,
               Container(
+                margin: EdgeInsets.only(bottom: 18.h),
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   color: AppColors.primaryColor,

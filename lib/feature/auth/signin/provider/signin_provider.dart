@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:denz_sen/core/base_url/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SigninProvider extends ChangeNotifier {
   bool isPassword = true;
@@ -65,6 +66,29 @@ class SigninProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<void> logout() async {
+    debugPrint('========== Starting Logout ==========');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Clear all stored user data
+      await prefs.remove('email');
+      await prefs.remove('full_name');
+      await prefs.remove('access_token');
+      await prefs.remove('refresh_token');
+
+      // Or clear everything
+      // await prefs.clear();
+
+      debugPrint('All user data cleared from SharedPreferences');
+      debugPrint('========== Logout Successful ==========');
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Logout Error: $e');
     }
   }
 }

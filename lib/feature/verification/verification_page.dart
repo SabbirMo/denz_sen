@@ -40,6 +40,15 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
   bool _isOtpFilled = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Load user data when the page opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<VerificationProvider>(context, listen: false).loadUserData();
+    });
+  }
+
+  @override
   void dispose() {
     for (var controller in _otpControllers) {
       controller.dispose();
@@ -106,11 +115,16 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                   ),
                 ),
                 AppSpacing.h10,
-                Text('Jhon Doe', style: AppStyle.semiBook16),
+                Consumer<VerificationProvider>(
+                  builder: (context, provider, _) =>
+                      Text(provider.name ?? 'User', style: AppStyle.semiBook16),
+                ),
                 AppSpacing.h2,
-                Text(
-                  'jhondoe@mail.com',
-                  style: AppStyle.book14.copyWith(fontSize: 12.sp),
+                Consumer<VerificationProvider>(
+                  builder: (context, provider, _) => Text(
+                    provider.email ?? 'No Email',
+                    style: AppStyle.book14.copyWith(fontSize: 12.sp),
+                  ),
                 ),
                 AppSpacing.h16,
                 Container(

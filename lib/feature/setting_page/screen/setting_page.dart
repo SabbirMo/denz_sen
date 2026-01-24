@@ -1,6 +1,8 @@
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
+import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
+import 'package:denz_sen/feature/auth/signin/screen/signin_screen.dart';
 import 'package:denz_sen/feature/change_password/screen/change_password_screen.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
@@ -8,6 +10,7 @@ import 'package:denz_sen/feature/setting_page/edit_information/edit_information_
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -36,9 +39,7 @@ class _SettingPageState extends State<SettingPage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const EditInformationPage(),
-                ),
+                MaterialPageRoute(builder: (_) => const EditInformationPage()),
               );
             },
             icon: Icon(Icons.edit_square),
@@ -120,7 +121,9 @@ class _SettingPageState extends State<SettingPage> {
               SliderTheme(
                 data: SliderThemeData(
                   trackHeight: 6.h,
-                  activeTrackColor: AppColors.primaryColor.withValues(alpha: 0.2),
+                  activeTrackColor: AppColors.primaryColor.withValues(
+                    alpha: 0.2,
+                  ),
                   inactiveTrackColor: AppColors.primaryColor.withValues(
                     alpha: 0.2,
                   ),
@@ -169,25 +172,53 @@ class _SettingPageState extends State<SettingPage> {
                 ),
                 child: ListTile(
                   onTap: () {
-                    showDialog(context: context, builder: (_)=> AlertDialog(
-                      title: Text('Log Out', style: AppStyle.semiBook16),
-                      content: Text('Are you sure you want to log out?', style: AppStyle.book14),
-                      actions: [
-                        TextButton(
-                          onPressed: (){
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('Cancel', style: AppStyle.semiBook14.copyWith(color: AppColors.greyText)),
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: Text('Log Out', style: AppStyle.semiBook16),
+                        content: Text(
+                          'Are you sure you want to log out?',
+                          style: AppStyle.book14,
                         ),
-                        TextButton(
-                          onPressed: (){
-                            // Add log out functionality here
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('Log Out', style: AppStyle.semiBook14.copyWith(color: AppColors.red)),
-                        ),
-                      ],
-                    ));
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(
+                              'Cancel',
+                              style: AppStyle.semiBook14.copyWith(
+                                color: AppColors.greyText,
+                              ),
+                            ),
+                          ),
+                          Consumer<SigninProvider>(
+                            builder: (context, ref, _) => TextButton(
+                              onPressed: () {
+                                ref.logout();
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const SignInScreen(),
+                                  ),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Logged out successfully.'),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'Log Out',
+                                style: AppStyle.semiBook14.copyWith(
+                                  color: AppColors.red,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   leading: Icon(
                     IconData(0xe3b3, fontFamily: 'MaterialIcons'),

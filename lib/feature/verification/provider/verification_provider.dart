@@ -8,12 +8,18 @@ class VerificationProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   bool isSuccess = false;
+  String? name;
+  String? email;
+
+  // Load user data from SharedPreferences
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    name = prefs.getString('full_name');
+    email = prefs.getString('email');
+    notifyListeners();
+  }
 
   Future<bool> verifyOtp(String email, String otp) async {
-    debugPrint('========== Starting OTP Verification ==========');
-    debugPrint('Email: $email');
-    debugPrint('OTP: $otp');
-
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -37,7 +43,6 @@ class VerificationProvider extends ChangeNotifier {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         debugPrint('OTP Verification Successful: $data');
-
         // Save email or token if needed
         if (data['email'] != null) {
           final prefs = await SharedPreferences.getInstance();
