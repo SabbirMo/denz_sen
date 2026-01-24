@@ -3,8 +3,11 @@ import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/feature/success_screen/success_screen_bottom_sheet.dart';
+import 'package:denz_sen/feature/verification/provider/verification_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum OtpSource { signup, passwordReset }
 
@@ -203,18 +206,90 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                 ),
                 AppSpacing.h28,
 
-                CustomButton(
-                  onPressed: _isOtpFilled
-                      ? () {
-                          Navigator.of(context).pop();
+                Consumer<VerificationProvider>(
+                  builder: (context, provider, _) {
+                    final bool isButtonEnabled =
+                        _isOtpFilled && !provider.isLoading;
 
-                          SuccessScreenBottomSheet.show(context);
-                        }
-                      : null,
-                  buttonText: 'Verify',
-                  backgroundColor: _isOtpFilled
-                      ? AppColors.primaryColor
-                      : AppColors.grey.withValues(alpha: 0.5),
+                    return CustomButton(
+                      isLoading: provider.isLoading,
+                      onPressed: isButtonEnabled
+                          ? () async {
+                              debugPrint('===== Verify Button Pressed =====');
+
+                              final otp = _otpControllers
+                                  .map((controller) => controller.text)
+                                  .join();
+
+                              debugPrint('OTP Entered: $otp');
+                              debugPrint('OTP Length: ${otp.length}');
+
+                              // Get email from SharedPreferences
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              final email = prefs.getString('email') ?? '';
+
+                              debugPrint(
+                                'Email from SharedPreferences: $email',
+                              );
+
+                              if (email.isEmpty) {
+                                debugPrint(
+                                  'ERROR: Email not found in SharedPreferences',
+                                );
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Email not found. Please sign up again.',
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+
+                              // Call API
+                              debugPrint('Calling verifyOtp API...');
+                              final success = await provider.verifyOtp(
+                                email,
+                                otp,
+                              );
+
+                              debugPrint('API Response Success: $success');
+
+                              if (!mounted) return;
+
+                              if (success) {
+                                debugPrint(
+                                  'Verification Success - Showing Success Screen',
+                                );
+                                Navigator.of(context).pop();
+                                SuccessScreenBottomSheet.show(
+                                  context,
+                                  type: SuccessType.verify,
+                                );
+                              } else {
+                                debugPrint(
+                                  'Verification Failed - Showing Error: ${provider.errorMessage}',
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      provider.errorMessage ??
+                                          'Verification failed',
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          : null,
+                      buttonText: 'Verify',
+                      backgroundColor: isButtonEnabled
+                          ? AppColors.primaryColor
+                          : null, // Let CustomButton handle disabled state
+                    );
+                  },
                 ),
 
                 AppSpacing.h32,

@@ -26,28 +26,44 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = onPressed == null || isLoading;
+
     return GestureDetector(
-      onTap: isLoading ? null : onPressed,
+      onTap: isDisabled ? null : onPressed,
       child: Container(
         padding: EdgeInsets.all(12),
         width: width ?? double.infinity,
         decoration: BoxDecoration(
-          color: backgroundColor ?? AppColors.primaryColor,
+          color: isDisabled
+              ? (backgroundColor ?? AppColors.grey.withValues(alpha: 0.5))
+              : (backgroundColor ?? AppColors.primaryColor),
           borderRadius: BorderRadius.circular(8.r),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              buttonText,
-              style: AppStyle.book16.copyWith(
-                color: textColor ?? AppColors.white,
+        child: isLoading
+            ? Center(
+                child: SizedBox(
+                  height: 24.h,
+                  width: 24.h,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      textColor ?? AppColors.white,
+                    ),
+                  ),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    buttonText,
+                    style: AppStyle.book16.copyWith(
+                      color: textColor ?? AppColors.white,
+                    ),
+                  ),
+                  AppSpacing.w10,
+                  if (icon != null) Icon(icon, color: AppColors.white),
+                ],
               ),
-            ),
-            AppSpacing.w10,
-            if (icon != null) Icon(icon, color: AppColors.white),
-          ],
-        ),
       ),
     );
   }

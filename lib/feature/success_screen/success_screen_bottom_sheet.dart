@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 
-enum SuccessType { passwordChanged, reportSubmitted }
+enum SuccessType { passwordChanged, reportSubmitted, verify }
 
 class SuccessScreenBottomSheet {
   static void show(
@@ -15,6 +15,7 @@ class SuccessScreenBottomSheet {
     SuccessType type = SuccessType.passwordChanged,
   }) {
     final bool isReportSubmitted = type == SuccessType.reportSubmitted;
+    final bool isVerify = type == SuccessType.verify;
 
     showModalBottomSheet(
       context: context,
@@ -44,7 +45,7 @@ class SuccessScreenBottomSheet {
                 ),
                 AppSpacing.h16,
 
-                if (isReportSubmitted == false)
+                if (isReportSubmitted == false && isVerify == false)
                   Text(
                     'Your password has been changed successfully!',
                     style: AppStyle.book14,
@@ -63,6 +64,15 @@ class SuccessScreenBottomSheet {
                   AppSpacing.h4,
                   Text(
                     'Your tip was submitted successfully.',
+                    style: AppStyle.book14,
+                  ),
+                ] else
+                  ...[],
+                if (isVerify == true) ...[
+                  Text('Verification Successful', style: AppStyle.semiBook20),
+                  AppSpacing.h4,
+                  Text(
+                    'Your email has been verified successfully.',
                     style: AppStyle.book14,
                   ),
                 ] else

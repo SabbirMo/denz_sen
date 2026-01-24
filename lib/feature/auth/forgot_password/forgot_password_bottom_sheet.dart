@@ -3,7 +3,6 @@ import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/core/widget/custom_filed.dart';
-import 'package:denz_sen/feature/auth/email_otp/email_otp_bottom_sheet.dart';
 import 'package:denz_sen/feature/verification/verification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -59,7 +58,7 @@ class ForgotPasswordBottomSheet {
                         Navigator.pop(
                           context,
                         ); // Close current bottom sheet first
-                        EmailOtpBottomSheet.show(context);
+                        // EmailOtpBottomSheet.show(context);
                       },
                       buttonText: 'Send Email',
                     ),

@@ -1,4 +1,3 @@
-
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
@@ -102,6 +101,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   AppSpacing.h22,
                   CustomButton(
                     buttonText: 'Sign In',
+                    isLoading: provider.isLoading,
                     onPressed: () {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text.trim();
@@ -117,11 +117,28 @@ class _SignInScreenState extends State<SignInScreen> {
 
                       debugPrint('Email: $email, Password: $password');
 
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
-                        ),
-                      );
+                      provider.signin(email, password).then((success) {
+                        if (success) {
+                          debugPrint('Signin Successful - Navigating to Home');
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => const HomeScreen(),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                provider.errorMessage ??
+                                    'Signin failed. Please try again. ${provider.errorMessage}',
+                              ),
+                            ),
+                          );
+                          debugPrint(
+                            'Signin Failed - Showing Error: ${provider.errorMessage}',
+                          );
+                        }
+                      });
                     },
                     width: double.infinity,
                   ),

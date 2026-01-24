@@ -68,21 +68,25 @@ class _SignupScreenState extends State<SignupScreen> {
                   CustomField(
                     title: 'User Name',
                     hintText: 'username',
+                    controller: _usernameController,
                     prefixIcon: SvgPicture.asset('assets/svgs/profile.svg'),
                   ),
                   CustomField(
                     title: 'Email',
                     hintText: 'email',
+                    controller: _emailController,
                     prefixIcon: SvgPicture.asset('assets/svgs/sms.svg'),
                   ),
                   CustomField(
                     title: 'COP ID',
                     hintText: 'COP ID',
+                    controller: _copIdController,
                     prefixIcon: SvgPicture.asset('assets/svgs/cop.svg'),
                   ),
                   CustomField(
                     title: 'Password',
                     hintText: 'password',
+                    controller: _passwordController,
                     prefixIcon: SvgPicture.asset('assets/svgs/lock.svg'),
                     suffixIcon: IconButton(
                       onPressed: () => provider.togglePasswordVisibility(),
@@ -97,9 +101,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   CustomField(
                     title: 'Confirm Password',
                     hintText: 'confirm password',
+                    controller: _confirmPasswordController,
                     prefixIcon: SvgPicture.asset('assets/svgs/lock.svg'),
                     suffixIcon: IconButton(
-                      onPressed: () => provider.toggleConfirmPasswordVisibility(),
+                      onPressed: () =>
+                          provider.toggleConfirmPasswordVisibility(),
                       icon: Icon(
                         provider.isConfirmPassword
                             ? Icons.visibility_off_outlined
@@ -112,8 +118,56 @@ class _SignupScreenState extends State<SignupScreen> {
                   AppSpacing.h12,
                   CustomButton(
                     buttonText: 'Sign Up',
+                    isLoading: provider.isLoading,
                     onPressed: () {
-                      VerificationPage.show(context);
+                      final fullName = _usernameController.text.trim();
+                      final email = _emailController.text.trim();
+                      final copID = _copIdController.text.trim();
+                      final password = _passwordController.text.trim();
+
+                      if (fullName.isEmpty ||
+                          email.isEmpty ||
+                          copID.isEmpty ||
+                          password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please fill in all fields.'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (password != _confirmPasswordController.text.trim()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Passwords do not match.'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (password.length < 6) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Password must be at least 6 characters long.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      provider.signUp(fullName, email, copID, password).then((
+                        _,
+                      ) {
+                        if (provider.errorMessage == null) {
+                          VerificationPage.show(context);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(provider.errorMessage!)),
+                          );
+                        }
+                      });
                     },
                   ),
                   AppSpacing.h18,
