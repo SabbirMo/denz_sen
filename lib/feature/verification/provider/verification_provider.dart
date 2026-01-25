@@ -139,6 +139,7 @@ class VerificationProvider extends ChangeNotifier {
         // Save email for password reset
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('email', email);
+        await prefs.setString('reset_token', resetToken);
         debugPrint('Email saved for password reset: $email');
 
         isSuccess = true;

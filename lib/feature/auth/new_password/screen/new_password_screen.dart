@@ -4,6 +4,7 @@ import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/core/widget/custom_filed.dart';
 import 'package:denz_sen/feature/auth/new_password/provider/new_password_provider.dart';
+import 'package:denz_sen/feature/success_screen/success_screen_bottom_sheet.dart';
 import 'package:denz_sen/feature/verification/verification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,7 +14,7 @@ class NewPasswordScreen {
   static void show(BuildContext context) {
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
-
+    Provider.of<NewPasswordProvider>(context, listen: false);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -90,32 +91,79 @@ class NewPasswordScreen {
                     ),
 
                     AppSpacing.h12,
-                    CustomButton(
-                      buttonText: 'Change Password',
-                      onPressed: () {
-                        final newPassword = newPasswordController.text.trim();
-                        final confirmPassword = confirmPasswordController.text
-                            .trim();
+                    Consumer<NewPasswordProvider>(
+                      builder: (context, provider, _) => CustomButton(
+                        buttonText: 'Change Password',
+                        isLoading: provider.isLoading,
+                        onPressed: () async {
+                          debugPrint('🔘 Change Password button clicked');
+                          final newPassword = newPasswordController.text.trim();
+                          final confirmPassword = confirmPasswordController.text
+                              .trim();
 
-                        if (newPassword.isEmpty || confirmPassword.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Please fill in all fields'),
-                            ),
+                          if (newPassword.isEmpty || confirmPassword.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Please fill in all fields'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (newPassword.length < 8) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Password must be at least 8 characters',
+                                ),
+                              ),
+                            );
+
+                            return;
+                          }
+
+                          if (newPassword != confirmPassword) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Passwords do not match')),
+                            );
+                            return;
+                          }
+
+                          // Call the API
+                          debugPrint('🔄 Calling setNewPassword API...');
+                          final success = await provider.setNewPassword(
+                            newPassword,
+                            confirmPassword,
                           );
-                          return;
-                        }
-
-                        if (newPassword != confirmPassword) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Passwords do not match')),
+                          debugPrint(
+                            '📊 API call completed. Success: $success',
                           );
-                          return;
-                        }
 
-                        debugPrint('New Password: $newPassword');
-                        debugPrint('Confirm Password: $confirmPassword');
-                      },
+                          if (!context.mounted) return;
+
+                          if (success) {
+                            // Close current bottom sheet
+                            Navigator.pop(context);
+
+                            // Show success bottom sheet
+                            SuccessScreenBottomSheet.show(
+                              context,
+                              type: SuccessType.passwordChanged,
+                            );
+                          } else {
+                            // Show error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  provider.errorMessage ??
+                                      'Failed to change password',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     ),
                     AppSpacing.h26,
                   ],
@@ -125,10 +173,6 @@ class NewPasswordScreen {
           ),
         );
       },
-    ).whenComplete(() {
-      // Dispose controllers when bottom sheet is closed
-      newPasswordController.dispose();
-      confirmPasswordController.dispose();
-    });
+    );
   }
 }
