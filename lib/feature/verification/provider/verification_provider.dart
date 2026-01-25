@@ -134,6 +134,8 @@ class VerificationProvider extends ChangeNotifier {
         final data = jsonDecode(response.body);
         debugPrint('Reset OTP Verification Successful: $data');
 
+        final resetToken = data['reset_token'];
+        debugPrint('Reset Token: $resetToken');
         // Save email for password reset
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('email', email);

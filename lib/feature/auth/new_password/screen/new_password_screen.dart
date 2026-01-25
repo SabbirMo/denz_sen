@@ -19,7 +19,9 @@ class NewPasswordScreen {
       isScrollControlled: true,
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -38,7 +40,7 @@ class NewPasswordScreen {
                         height: 6.h,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: AppColors.grey.withOpacity(0.5),
+                            color: AppColors.grey.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(3.r),
                           ),
                         ),
@@ -74,7 +76,8 @@ class NewPasswordScreen {
                               title: 'Confirm Password',
                               hintText: 'Enter confirm password',
                               suffixIcon: IconButton(
-                                onPressed: provider.toggleNewConfirmPasswordVisibility,
+                                onPressed:
+                                    provider.toggleNewConfirmPasswordVisibility,
                                 icon: provider.newConfirmPassword
                                     ? Icon(Icons.visibility_off_outlined)
                                     : Icon(Icons.visibility_outlined),
@@ -91,11 +94,14 @@ class NewPasswordScreen {
                       buttonText: 'Change Password',
                       onPressed: () {
                         final newPassword = newPasswordController.text.trim();
-                        final confirmPassword = confirmPasswordController.text.trim();
+                        final confirmPassword = confirmPasswordController.text
+                            .trim();
 
                         if (newPassword.isEmpty || confirmPassword.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please fill in all fields')),
+                            SnackBar(
+                              content: Text('Please fill in all fields'),
+                            ),
                           );
                           return;
                         }

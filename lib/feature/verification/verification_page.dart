@@ -2,7 +2,7 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
-import 'package:denz_sen/feature/change_password/screen/change_password_screen.dart';
+import 'package:denz_sen/feature/auth/new_password/screen/new_password_screen.dart';
 import 'package:denz_sen/feature/success_screen/success_screen_bottom_sheet.dart';
 import 'package:denz_sen/feature/verification/provider/verification_provider.dart';
 import 'package:flutter/material.dart';
@@ -300,12 +300,7 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                                 } else if (widget.otpSource ==
                                     OtpSource.passwordReset) {
                                   // Navigate to change password screen
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ChangePasswordScreen(),
-                                    ),
-                                  );
+                                  NewPasswordScreen.show(context);
                                 }
                               } else {
                                 debugPrint(
