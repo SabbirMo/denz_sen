@@ -1,4 +1,5 @@
 import 'package:denz_sen/core/theme/app_style.dart';
+import 'package:denz_sen/feature/auth/forgot_password/provider/forgot_password_provider.dart';
 import 'package:denz_sen/feature/auth/new_password/provider/new_password_provider.dart';
 import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
 import 'package:denz_sen/feature/auth/singup/provider/singup_provider.dart';
@@ -19,6 +20,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => NewPasswordProvider()),
         ChangeNotifierProvider(create: (_) => ChangePasswordProvider()),
         ChangeNotifierProvider(create: (_) => VerificationProvider()),
+        ChangeNotifierProvider(create: (_) => ForgotPasswordProvider()),
       ],
       child: const MyApp(),
     ),

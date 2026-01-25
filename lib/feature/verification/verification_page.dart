@@ -2,6 +2,7 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
+import 'package:denz_sen/feature/change_password/screen/change_password_screen.dart';
 import 'package:denz_sen/feature/success_screen/success_screen_bottom_sheet.dart';
 import 'package:denz_sen/feature/verification/provider/verification_provider.dart';
 import 'package:flutter/material.dart';
@@ -12,19 +13,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum OtpSource { signup, passwordReset }
 
 class VerificationPage {
-  static void show(BuildContext context) {
+  static void show(BuildContext context, {required OtpSource otpSource}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return const _VerificationBottomSheet();
+        return _VerificationBottomSheet(otpSource: otpSource);
       },
     );
   }
 }
 
 class _VerificationBottomSheet extends StatefulWidget {
-  const _VerificationBottomSheet();
+  const _VerificationBottomSheet({required this.otpSource});
+
+  final OtpSource otpSource;
 
   @override
   State<_VerificationBottomSheet> createState() =>
@@ -44,7 +47,12 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
     super.initState();
     // Load user data when the page opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<VerificationProvider>(context, listen: false).loadUserData();
+      final provider = Provider.of<VerificationProvider>(
+        context,
+        listen: false,
+      );
+      provider.setOtpSource(widget.otpSource);
+      provider.loadUserData();
     });
   }
 
@@ -103,30 +111,35 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                 AppSpacing.h8,
                 BottomSheetIconText(title: 'Verify Your Account'),
                 AppSpacing.h10,
-                CircleAvatar(
-                  radius: 40.r, // size of the avatar
-                  backgroundColor: AppColors.grey.withValues(
-                    alpha: 0.1,
-                  ), // light gray background
-                  child: Icon(
-                    Icons.person, // default profile icon
-                    size: 40.r, // icon size
-                    color: AppColors.primaryColor, // icon color
+                // Show user info only for signup
+                if (widget.otpSource == OtpSource.signup) ...[
+                  CircleAvatar(
+                    radius: 40.r, // size of the avatar
+                    backgroundColor: AppColors.grey.withValues(
+                      alpha: 0.1,
+                    ), // light gray background
+                    child: Icon(
+                      Icons.person, // default profile icon
+                      size: 40.r, // icon size
+                      color: AppColors.primaryColor, // icon color
+                    ),
                   ),
-                ),
-                AppSpacing.h10,
-                Consumer<VerificationProvider>(
-                  builder: (context, provider, _) =>
-                      Text(provider.name ?? 'User', style: AppStyle.semiBook16),
-                ),
-                AppSpacing.h2,
-                Consumer<VerificationProvider>(
-                  builder: (context, provider, _) => Text(
-                    provider.email ?? 'No Email',
-                    style: AppStyle.book14.copyWith(fontSize: 12.sp),
+                  AppSpacing.h10,
+                  Consumer<VerificationProvider>(
+                    builder: (context, provider, _) => Text(
+                      provider.name ?? 'User',
+                      style: AppStyle.semiBook16,
+                    ),
                   ),
-                ),
-                AppSpacing.h16,
+                  AppSpacing.h2,
+                  Consumer<VerificationProvider>(
+                    builder: (context, provider, _) => Text(
+                      provider.email ?? 'No Email',
+                      style: AppStyle.book14.copyWith(fontSize: 12.sp),
+                    ),
+                  ),
+                  AppSpacing.h16,
+                ],
                 Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -222,12 +235,9 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
 
                 Consumer<VerificationProvider>(
                   builder: (context, provider, _) {
-                    final bool isButtonEnabled =
-                        _isOtpFilled && !provider.isLoading;
-
                     return CustomButton(
                       isLoading: provider.isLoading,
-                      onPressed: isButtonEnabled
+                      onPressed: _isOtpFilled && !provider.isLoading
                           ? () async {
                               debugPrint('===== Verify Button Pressed =====');
 
@@ -263,12 +273,12 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                                 return;
                               }
 
-                              // Call API
+                              // Call API based on OTP source
                               debugPrint('Calling verifyOtp API...');
-                              final success = await provider.verifyOtp(
-                                email,
-                                otp,
-                              );
+                              final success =
+                                  widget.otpSource == OtpSource.passwordReset
+                                  ? await provider.verifyResetOtp(email, otp)
+                                  : await provider.verifyOtp(email, otp);
 
                               debugPrint('API Response Success: $success');
 
@@ -279,10 +289,24 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                                   'Verification Success - Showing Success Screen',
                                 );
                                 Navigator.of(context).pop();
-                                SuccessScreenBottomSheet.show(
-                                  context,
-                                  type: SuccessType.verify,
-                                );
+
+                                // Navigate based on OTP source
+                                if (widget.otpSource == OtpSource.signup) {
+                                  // Show success screen for signup
+                                  SuccessScreenBottomSheet.show(
+                                    context,
+                                    type: SuccessType.verify,
+                                  );
+                                } else if (widget.otpSource ==
+                                    OtpSource.passwordReset) {
+                                  // Navigate to change password screen
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ChangePasswordScreen(),
+                                    ),
+                                  );
+                                }
                               } else {
                                 debugPrint(
                                   'Verification Failed - Showing Error: ${provider.errorMessage}',
@@ -299,9 +323,9 @@ class _VerificationBottomSheetState extends State<_VerificationBottomSheet> {
                             }
                           : null,
                       buttonText: 'Verify',
-                      backgroundColor: isButtonEnabled
+                      backgroundColor: _isOtpFilled && !provider.isLoading
                           ? AppColors.primaryColor
-                          : null, // Let CustomButton handle disabled state
+                          : AppColors.grey.withValues(alpha: 0.5),
                     );
                   },
                 ),

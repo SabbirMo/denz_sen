@@ -4,7 +4,7 @@ import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/core/widget/custom_filed.dart';
 import 'package:denz_sen/core/widget/header_section.dart';
-import 'package:denz_sen/feature/auth/forgot_password/forgot_password_bottom_sheet.dart';
+import 'package:denz_sen/feature/auth/forgot_password/screen/forgot_password_bottom_sheet.dart';
 import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
 import 'package:denz_sen/feature/auth/singup/screen/signup_screen.dart';
 import 'package:denz_sen/feature/home/screen/home_screen.dart';

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/feature/verification/verification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,16 +11,28 @@ class VerificationProvider extends ChangeNotifier {
   bool isSuccess = false;
   String? name;
   String? email;
+  OtpSource? otpSource;
+
+  // Set OTP source
+  void setOtpSource(OtpSource source) {
+    otpSource = source;
+    notifyListeners();
+  }
 
   // Load user data from SharedPreferences
   Future<void> loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     name = prefs.getString('full_name');
     email = prefs.getString('email');
+
     notifyListeners();
   }
 
   Future<bool> verifyOtp(String email, String otp) async {
+    debugPrint('========== Starting OTP Verification ==========');
+    debugPrint('Email: $email');
+    debugPrint('OTP: $otp');
+
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -89,6 +102,82 @@ class VerificationProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       debugPrint('========== OTP Verification Ended ==========');
+    }
+  }
+
+  Future<bool> verifyResetOtp(String email, String otp) async {
+    debugPrint('========== Starting Reset OTP Verification ==========');
+    debugPrint('Email: $email');
+    debugPrint('OTP: $otp');
+
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    final uri = Uri.parse('$baseUrl/api/v1/auth/verify-reset-otp');
+    debugPrint('API URL: $uri');
+
+    try {
+      final requestBody = jsonEncode({'email': email, 'otp': otp});
+      debugPrint('Request Body: $requestBody');
+
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: requestBody,
+      );
+
+      debugPrint('Response Status Code: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        debugPrint('Reset OTP Verification Successful: $data');
+
+        // Save email for password reset
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('email', email);
+        debugPrint('Email saved for password reset: $email');
+
+        isSuccess = true;
+        return true;
+      } else {
+        try {
+          final data = jsonDecode(response.body);
+
+          // Handle different error response formats
+          if (data['detail'] != null) {
+            if (data['detail'] is String) {
+              errorMessage = data['detail'];
+            } else if (data['detail'] is List) {
+              final details = data['detail'] as List;
+              errorMessage = details.isNotEmpty
+                  ? (details.first['msg'] ?? 'Reset OTP verification failed')
+                  : 'Reset OTP verification failed';
+            } else {
+              errorMessage = 'Reset OTP verification failed';
+            }
+          } else if (data['message'] != null) {
+            errorMessage = data['message'];
+          } else {
+            errorMessage = 'Reset OTP verification failed';
+          }
+        } catch (_) {
+          errorMessage =
+              'Reset OTP verification failed. Status: ${response.statusCode}';
+        }
+
+        debugPrint('Reset OTP Verification Failed: $errorMessage');
+        return false;
+      }
+    } catch (e) {
+      errorMessage = 'An error occurred: $e';
+      debugPrint('Reset OTP Verification Error: $e');
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+      debugPrint('========== Reset OTP Verification Ended ==========');
     }
   }
 }

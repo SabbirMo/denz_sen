@@ -161,7 +161,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         _,
                       ) {
                         if (provider.errorMessage == null) {
-                          VerificationPage.show(context);
+                          VerificationPage.show(
+                            context,
+                            otpSource: OtpSource.signup,
+                          );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(provider.errorMessage!)),

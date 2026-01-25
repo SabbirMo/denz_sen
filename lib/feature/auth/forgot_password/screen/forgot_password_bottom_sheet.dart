@@ -3,12 +3,16 @@ import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/core/widget/custom_filed.dart';
+import 'package:denz_sen/feature/auth/forgot_password/provider/forgot_password_provider.dart';
 import 'package:denz_sen/feature/verification/verification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPasswordBottomSheet {
   static void show(BuildContext context) {
+    final emailController = TextEditingController();
+    Provider.of<ForgotPasswordProvider>(context, listen: false);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -51,16 +55,30 @@ class ForgotPasswordBottomSheet {
                     CustomField(
                       title: 'Email Address',
                       hintText: 'Enter your email',
+                      controller: emailController,
                     ),
                     AppSpacing.h12,
-                    CustomButton(
-                      onPressed: () {
-                        Navigator.pop(
-                          context,
-                        ); // Close current bottom sheet first
-                        // EmailOtpBottomSheet.show(context);
+                    Consumer<ForgotPasswordProvider>(
+                      builder: (context, provider, _) {
+                        return CustomButton(
+                          isLoading: provider.isLoading,
+                          onPressed: () async {
+                            final email = emailController.text.trim();
+                            final success = await provider
+                                .sendForgotPasswordEmail(email);
+                            if (success) {
+                              Navigator.pop(
+                                context,
+                              ); // Close current bottom sheet first
+                              VerificationPage.show(
+                                context,
+                                otpSource: OtpSource.passwordReset,
+                              );
+                            }
+                          },
+                          buttonText: 'Send Email',
+                        );
                       },
-                      buttonText: 'Send Email',
                     ),
                     AppSpacing.h26,
                   ],
