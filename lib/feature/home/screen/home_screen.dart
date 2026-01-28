@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/cop_portal/screen/cop_portal_screen.dart';
+import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_home_tab_bar.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
 import 'package:denz_sen/feature/my_cases/screen/my_cases_screen.dart';
@@ -12,7 +12,9 @@ import 'package:denz_sen/feature/submit_report/screen/submit_report_screen.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,27 +26,38 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   double currentValue = 0;
 
-  File? image;
-  final ImagePicker _picker = ImagePicker();
+  // File? image;
+  // final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickImage() async {
-    try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-      );
-      if (pickedFile != null) {
-        setState(() {
-          image = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      debugPrint('Error picking image: $e');
-    }
+  // Future<void> _pickImage() async {
+  //   try {
+  //     final XFile? pickedFile = await _picker.pickImage(
+  //       source: ImageSource.camera,
+  //       imageQuality: 80,
+  //     );
+  //     if (pickedFile != null) {
+  //       setState(() {
+  //         image = File(pickedFile.path);
+  //       });
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error picking image: $e');
+  //   }
+  // }
+
+  Set<Marker> markers = {};
+  GoogleMapController? mapController;
+  Position? currentPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    _onTapGetMyLocation();
   }
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<GoogleMapsProvider>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -89,9 +102,38 @@ class _HomeScreenState extends State<HomeScreen> {
                                 padding: EdgeInsets.all(1.w),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(16.r),
-                                  child: Image.asset(
-                                    'assets/images/maps.png',
-                                    fit: BoxFit.cover,
+
+                                  //  Image.asset(
+                                  //   'assets/images/maps.png',
+                                  //   fit: BoxFit.cover,
+                                  // ),
+                                  child: GoogleMap(
+                                    initialCameraPosition: CameraPosition(
+                                      target: LatLng(23.780682, 90.407428),
+                                      zoom: 16,
+                                    ),
+                                    zoomControlsEnabled: false,
+                                    zoomGesturesEnabled: false,
+                                    markers: markers,
+                                    onMapCreated:
+                                        (GoogleMapController controller) {
+                                          mapController = controller;
+                                        },
+                                    onTap: (LatLng position) {
+                                      setState(() {
+                                        markers = {
+                                          Marker(
+                                            markerId: MarkerId(
+                                              'selected-location',
+                                            ),
+                                            position: position,
+                                            infoWindow: InfoWindow(
+                                              title: position.toString(),
+                                            ),
+                                          ),
+                                        };
+                                      });
+                                    },
                                   ),
                                 ),
                               ),
@@ -102,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             bottom: 12.h,
                             left: 12.w,
                             child: GestureDetector(
-                              onTap: _pickImage,
+                              onTap: _onTapGetMyLocation,
                               child: Container(
                                 padding: EdgeInsets.all(10),
                                 decoration: BoxDecoration(
@@ -110,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   borderRadius: BorderRadius.circular(4.r),
                                 ),
                                 child: Icon(
-                                  Icons.camera_alt_sharp,
+                                  Icons.my_location,
                                   size: 24.w,
                                   color: AppColors.primaryColor,
                                 ),
@@ -268,6 +310,87 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onTapGetMyLocation() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      bool isLocationServiceEnabled =
+          await Geolocator.isLocationServiceEnabled();
+      if (isLocationServiceEnabled) {
+        Position position = await Geolocator.getCurrentPosition();
+        print('Current Position: $position');
+
+        // Update location to server
+        final provider = Provider.of<GoogleMapsProvider>(
+          context,
+          listen: false,
+        );
+        bool success = await provider.updateUserLocation(
+          position.latitude,
+          position.longitude,
+        );
+
+        if (success) {
+          setState(() {
+            currentPosition = position;
+            markers = {
+              Marker(
+                markerId: MarkerId('my-location'),
+                position: LatLng(position.latitude, position.longitude),
+                infoWindow: InfoWindow(
+                  title: 'My Location',
+                  snippet:
+                      'Lat: ${position.latitude}, Long: ${position.longitude}',
+                ),
+              ),
+            };
+          });
+
+          if (mapController != null) {
+            mapController!.animateCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: LatLng(position.latitude, position.longitude),
+                  zoom: 16,
+                ),
+              ),
+            );
+          }
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Location updated successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  provider.errorMessage ?? 'Failed to update location',
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } else {
+        Geolocator.openLocationSettings();
+      }
+    } else {
+      LocationPermission requestedPermission =
+          await Geolocator.requestPermission();
+      if (requestedPermission == LocationPermission.always ||
+          requestedPermission == LocationPermission.whileInUse) {
+        _onTapGetMyLocation();
+        return;
+      }
+    }
   }
 }
 

@@ -37,6 +37,16 @@ class SigninProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
+
+        final accessToken = data['access_token'];
+        final refreshToken = data['refresh_token'];
+
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access_token', accessToken);
+        await prefs.setString('refresh_token', refreshToken);
+
+        print('acces_token: $accessToken \n refresh_token: $refreshToken');
+
         debugPrint('Signin Successful: $data');
         isLoading = false;
         notifyListeners();

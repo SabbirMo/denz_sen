@@ -4,6 +4,7 @@ import 'package:denz_sen/feature/auth/new_password/provider/new_password_provide
 import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
 import 'package:denz_sen/feature/auth/singup/provider/singup_provider.dart';
 import 'package:denz_sen/feature/change_password/provider/change_password_provider.dart';
+import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/splash/splash_screen.dart';
 import 'package:denz_sen/feature/verification/provider/verification_provider.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ChangePasswordProvider()),
         ChangeNotifierProvider(create: (_) => VerificationProvider()),
         ChangeNotifierProvider(create: (_) => ForgotPasswordProvider()),
+        ChangeNotifierProvider(create: (_) => GoogleMapsProvider()),
       ],
       child: const MyApp(),
     ),
