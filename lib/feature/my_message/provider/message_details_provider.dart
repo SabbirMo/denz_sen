@@ -1,21 +1,21 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
-import 'package:denz_sen/feature/my_message/model/my_message_model.dart';
+import 'package:denz_sen/feature/my_message/model/message_details_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MyMessageProvider extends ChangeNotifier {
+class MessageDetailsProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
-  List<MyMessageModel> messages = [];
+  List<MessageDetailsModel> messages = [];
 
-  Future<List<MyMessageModel>> fatchMessage() async {
+  Future<List<MessageDetailsModel>> fetchMessageDetails(int caseId) async {
     isLoading = true;
     notifyListeners();
-
-    final url = Uri.parse('$baseUrl/api/v1/chat/my-conversations');
+    final url = Uri.parse('$baseUrl/api/v1/chat/$caseId/messages');
+    debugPrint('🔄 Fetching message details for case ID: $caseId');
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -28,23 +28,23 @@ class MyMessageProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
-        messages = data.map((json) => MyMessageModel.fromJson(json)).toList();
-        debugPrint(
-          '✅ Messages fetched successfully: ${messages.length} messages',
-        );
+        messages = data.map((e) => MessageDetailsModel.fromJson(e)).toList();
         return messages;
       } else {
         errorMessage = 'Failed to load messages: ${response.statusCode}';
-        debugPrint(errorMessage);
+        debugPrint(' $errorMessage');
         return [];
       }
     } catch (e) {
       errorMessage = 'An error occurred: $e';
-      debugPrint(errorMessage);
+      debugPrint(' $errorMessage');
       return [];
     } finally {
       isLoading = false;
       notifyListeners();
+      debugPrint(
+        '🏁 Loading complete. isLoading: $isLoading, messages count: ${messages.length}',
+      );
     }
   }
 }

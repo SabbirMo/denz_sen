@@ -57,7 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<GoogleMapsProvider>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -114,6 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     zoomControlsEnabled: false,
                                     zoomGesturesEnabled: false,
+                                    myLocationButtonEnabled: false,
+                                    mapToolbarEnabled: false,
+                                    liteModeEnabled: false,
                                     markers: markers,
                                     onMapCreated:
                                         (GoogleMapController controller) {
@@ -360,21 +362,25 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if (mounted) {
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Location updated successfully'),
                 backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
               ),
             );
           }
         } else {
           if (mounted) {
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
                   provider.errorMessage ?? 'Failed to update location',
                 ),
                 backgroundColor: Colors.red,
+                duration: Duration(seconds: 2),
               ),
             );
           }

@@ -36,4 +36,9 @@ class MyMessageModel {
       'lastActivity': lastActivity,
     };
   }
+
+  @override
+  String toString() {
+    return 'MyMessageModel(id: $id, caseNumber: $caseNumber, caseStatus: $caseStatus, lastMessage: $lastMessage, lastSender: $lastSender, lastActivity: $lastActivity)';
+  }
 }

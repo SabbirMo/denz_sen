@@ -3,6 +3,7 @@ import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/my_cases/widget/case_status_widget.dart';
 import 'package:denz_sen/feature/my_message/provider/my_message_provider.dart';
+import 'package:denz_sen/feature/my_message/screen/message_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -95,7 +96,18 @@ class _MyMessageScreenState extends State<MyMessageScreen> {
                     itemCount: provider.messages.length,
                     itemBuilder: (context, index) {
                       final message = provider.messages[index];
-                      return MyMessageCaseWidget(message: message);
+                      return MyMessageCaseWidget(
+                        message: message,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  MessageDetailsPage(caseId: message.id),
+                            ),
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -182,9 +194,10 @@ class MessageShimmer extends StatelessWidget {
 }
 
 class MyMessageCaseWidget extends StatelessWidget {
-  const MyMessageCaseWidget({super.key, required this.message});
+  const MyMessageCaseWidget({super.key, required this.message, this.onTap});
 
   final dynamic message;
+  final VoidCallback? onTap;
 
   Status _getStatusFromString(String status) {
     switch (status.toLowerCase()) {
@@ -201,77 +214,80 @@ class MyMessageCaseWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: Color(0xfff9f6f7),
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 24.r,
-            backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
-            child: SvgPicture.asset(
-              'assets/svgs/messages.svg',
-              width: 24.w,
-              height: 24.h,
-              // ignore: deprecated_member_use
-              color: AppColors.primaryColor,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: Color(0xfff9f6f7),
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24.r,
+              backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+              child: SvgPicture.asset(
+                'assets/svgs/messages.svg',
+                width: 24.w,
+                height: 24.h,
+                // ignore: deprecated_member_use
+                color: AppColors.primaryColor,
+              ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      message.caseNumber ?? 'N/A',
-                      style: AppStyle.medium14.copyWith(
-                        color: AppColors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    AppSpacing.w10,
-                    CaseStatesWidget(
-                      status: _getStatusFromString(
-                        message.caseStatus ?? 'pending',
-                      ),
-                    ),
-                    Spacer(),
-                    Text(
-                      message.lastActivity ?? '',
-                      style: AppStyle.medium12.copyWith(
-                        color: AppColors.lightGrey,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                RichText(
-                  text: TextSpan(
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      TextSpan(
-                        text: '${message.lastSender ?? 'Unknown'}: ',
-                        style: AppStyle.medium12,
+                      Text(
+                        message.caseNumber ?? 'N/A',
+                        style: AppStyle.medium14.copyWith(
+                          color: AppColors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      TextSpan(
-                        text: message.lastMessage ?? 'No message',
+                      AppSpacing.w10,
+                      CaseStatesWidget(
+                        status: _getStatusFromString(
+                          message.caseStatus ?? 'pending',
+                        ),
+                      ),
+                      Spacer(),
+                      Text(
+                        message.lastActivity ?? '',
                         style: AppStyle.medium12.copyWith(
                           color: AppColors.lightGrey,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 4.h),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${message.lastSender ?? 'Unknown'}: ',
+                          style: AppStyle.medium12,
+                        ),
+                        TextSpan(
+                          text: message.lastMessage ?? 'No message',
+                          style: AppStyle.medium12.copyWith(
+                            color: AppColors.lightGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
