@@ -1,2 +1,2 @@
-final String baseUrl = 'http://10.10.13.20:8000';
-final String wsBaseUrl = 'ws://10.10.13.20:8000';
+final String baseUrl = 'https://clubby-andy-irksomely.ngrok-free.dev';
+final String wsBaseUrl = 'wss://clubby-andy-irksomely.ngrok-free.dev';

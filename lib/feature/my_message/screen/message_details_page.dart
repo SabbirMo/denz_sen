@@ -4,6 +4,7 @@ import 'package:denz_sen/feature/my_message/provider/message_details_provider.da
 import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
 import 'package:denz_sen/feature/my_message/screen/my_message_screen.dart';
+import 'package:denz_sen/feature/my_message/widget/close_case_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -61,6 +62,12 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
     super.dispose();
   }
 
+  void _addMember() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Add Member feature coming soon')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,9 +122,54 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
           ],
         ),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.black),
-            onPressed: () {},
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            offset: Offset(0, 50.h),
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'add_member',
+                child: Row(
+                  children: [
+                    Icon(Icons.person_add, color: Colors.blue, size: 20.sp),
+                    SizedBox(width: 12.w),
+                    Text(
+                      'Add Member',
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'close_case',
+                child: Row(
+                  children: [
+                    Icon(Icons.close, color: Colors.red, size: 20.sp),
+                    SizedBox(width: 12.w),
+                    Text(
+                      'Close Case',
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (String value) {
+              if (value == 'add_member') {
+                _addMember();
+              } else if (value == 'close_case') {
+                CloseCaseDialog.show(context, onConfirm: () {});
+              }
+            },
           ),
         ],
       ),

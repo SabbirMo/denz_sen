@@ -5,6 +5,8 @@ import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
 import 'package:denz_sen/feature/auth/singup/provider/singup_provider.dart';
 import 'package:denz_sen/feature/change_password/provider/change_password_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
+import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
+import 'package:denz_sen/feature/my_cases/provider/my_cases_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_details_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
@@ -27,10 +29,12 @@ void main() {
         ChangeNotifierProvider(create: (_) => VerificationProvider()),
         ChangeNotifierProvider(create: (_) => ForgotPasswordProvider()),
         ChangeNotifierProvider(create: (_) => GoogleMapsProvider()),
+        ChangeNotifierProvider(create: (_) => MyCasesProvider()),
         ChangeNotifierProvider(create: (_) => MyMessageProvider()),
         ChangeNotifierProvider(create: (_) => MessageDetailsProvider()),
         ChangeNotifierProvider(create: (_) => MessageSendProvider()),
         ChangeNotifierProvider(create: (_) => MessageSocketProvider()),
+        ChangeNotifierProvider(create: (_) => MyCasesPendingDispatchProvider()),
       ],
       child: const MyApp(),
     ),

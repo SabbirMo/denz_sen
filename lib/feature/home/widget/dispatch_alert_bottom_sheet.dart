@@ -130,12 +130,18 @@ class CaseRowWidget extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: 6.h),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(slotsText, style: AppStyle.medium14),
-          Text(
-            slotsValue,
-            style: AppStyle.semiBook14.copyWith(color: AppColors.black),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              slotsValue,
+              style: AppStyle.semiBook14.copyWith(color: AppColors.black),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+            ),
           ),
         ],
       ),

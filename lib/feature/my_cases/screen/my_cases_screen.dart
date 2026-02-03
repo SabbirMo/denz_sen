@@ -5,14 +5,38 @@ import 'package:denz_sen/feature/my_cases/screen/close_case_screen.dart';
 import 'package:denz_sen/feature/my_cases/screen/pending_case_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class MyCasesScreen extends StatelessWidget {
+class MyCasesScreen extends StatefulWidget {
   const MyCasesScreen({super.key});
 
   @override
+  State<MyCasesScreen> createState() => _MyCasesScreenState();
+}
+
+class _MyCasesScreenState extends State<MyCasesScreen> {
+  String userRole = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userRole = prefs.getString('role') ?? 'user';
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool isAnalyst = userRole.toLowerCase() == 'analyst';
+    final int tabLength = isAnalyst ? 3 : 2;
+
     return DefaultTabController(
-      length: 3,
+      length: tabLength,
       child: Scaffold(
         appBar: AppBar(
           title: Text('My Cases', style: AppStyle.semiBook20),
@@ -36,7 +60,7 @@ class MyCasesScreen extends StatelessWidget {
             tabs: [
               Tab(text: 'Active'),
               Tab(text: 'Closed'),
-              Tab(text: 'Pending'),
+              if (isAnalyst) Tab(text: 'Pending'),
             ],
           ),
         ),
@@ -44,7 +68,7 @@ class MyCasesScreen extends StatelessWidget {
           children: [
             ActiveCaseScreen(),
             CloseCaseScreen(),
-            PendingCaseScreen(),
+            if (isAnalyst) PendingCaseScreen(),
           ],
         ),
       ),

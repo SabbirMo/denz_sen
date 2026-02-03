@@ -19,13 +19,49 @@ class MyMessageScreen extends StatefulWidget {
 }
 
 class _MyMessageScreenState extends State<MyMessageScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
     Future.microtask(() {
       // ignore: use_build_context_synchronously
       Provider.of<MyMessageProvider>(context, listen: false).fatchMessage();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<dynamic> _filterMessages(List<dynamic> messages) {
+    if (_searchQuery.isEmpty) return messages;
+
+    // Remove special characters and spaces for flexible search
+    final cleanQuery = _searchQuery.replaceAll(RegExp(r'[-\s]'), '');
+
+    return messages.where((message) {
+      final caseNumber = (message.caseNumber ?? '').toLowerCase().replaceAll(
+        RegExp(r'[-\s]'),
+        '',
+      );
+      final lastMessage = (message.lastMessage ?? '').toLowerCase();
+      final lastSender = (message.lastSender ?? '').toLowerCase();
+      final caseStatus = (message.caseStatus ?? '').toLowerCase();
+
+      return caseNumber.contains(cleanQuery) ||
+          lastMessage.contains(_searchQuery) ||
+          lastSender.contains(_searchQuery) ||
+          caseStatus.contains(_searchQuery);
+    }).toList();
   }
 
   @override
@@ -56,11 +92,20 @@ class _MyMessageScreenState extends State<MyMessageScreen> {
                   border: Border.all(color: AppColors.border),
                 ),
                 child: TextField(
+                  controller: _searchController,
                   autofocus: false,
                   decoration: InputDecoration(
                     hintText: 'Search messages',
                     border: InputBorder.none,
                     prefixIcon: Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                            },
+                          )
+                        : null,
                     contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                   ),
                 ),
@@ -77,12 +122,16 @@ class _MyMessageScreenState extends State<MyMessageScreen> {
                     );
                   }
 
-                  if (provider.messages.isEmpty) {
+                  final filteredMessages = _filterMessages(provider.messages);
+
+                  if (filteredMessages.isEmpty) {
                     return Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 50.h),
                         child: Text(
-                          'No messages found',
+                          _searchQuery.isEmpty
+                              ? 'No messages found'
+                              : 'No messages match your search',
                           style: AppStyle.medium14.copyWith(
                             color: AppColors.lightGrey,
                           ),
@@ -93,9 +142,10 @@ class _MyMessageScreenState extends State<MyMessageScreen> {
 
                   return ListView.builder(
                     shrinkWrap: true,
-                    itemCount: provider.messages.length,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: filteredMessages.length,
                     itemBuilder: (context, index) {
-                      final message = provider.messages[index];
+                      final message = filteredMessages[index];
                       return MyMessageCaseWidget(
                         message: message,
                         onTap: () {
