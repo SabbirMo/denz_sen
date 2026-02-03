@@ -6,6 +6,8 @@ import 'package:denz_sen/feature/auth/singup/provider/singup_provider.dart';
 import 'package:denz_sen/feature/change_password/provider/change_password_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_details_provider.dart';
+import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
+import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/my_message_provider.dart';
 import 'package:denz_sen/feature/splash/splash_screen.dart';
 import 'package:denz_sen/feature/verification/provider/verification_provider.dart';
@@ -27,6 +29,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => GoogleMapsProvider()),
         ChangeNotifierProvider(create: (_) => MyMessageProvider()),
         ChangeNotifierProvider(create: (_) => MessageDetailsProvider()),
+        ChangeNotifierProvider(create: (_) => MessageSendProvider()),
+        ChangeNotifierProvider(create: (_) => MessageSocketProvider()),
       ],
       child: const MyApp(),
     ),

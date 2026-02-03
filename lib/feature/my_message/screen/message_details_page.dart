@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:denz_sen/feature/my_message/provider/message_details_provider.dart';
+import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
+import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
 import 'package:denz_sen/feature/my_message/screen/my_message_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class MessageDetailsPage extends StatefulWidget {
@@ -14,17 +19,46 @@ class MessageDetailsPage extends StatefulWidget {
 }
 
 class _MessageDetailsPageState extends State<MessageDetailsPage> {
+  final TextEditingController _messageController = TextEditingController();
+  final List<File> _selectedFiles = [];
+  final ImagePicker _picker = ImagePicker();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        final socketProvider = Provider.of<MessageSocketProvider>(
+          context,
+          listen: false,
+        );
+
+        // Set callback to refresh when new message arrives via WebSocket
+        socketProvider.onNewMessage = () {
+          if (mounted) {
+            Provider.of<MessageDetailsProvider>(
+              context,
+              listen: false,
+            ).fetchMessageDetails(widget.caseId);
+          }
+        };
+
+        // Connect to WebSocket for real-time messaging
+        socketProvider.connect(widget.caseId);
+
+        // Fallback: Load message history via REST API
         Provider.of<MessageDetailsProvider>(
           context,
           listen: false,
         ).fetchMessageDetails(widget.caseId);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -38,13 +72,47 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Case #${widget.caseId.toString().padLeft(5, '0')}',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Case #${widget.caseId.toString().padLeft(5, '0')}',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Consumer<MessageSocketProvider>(
+              builder: (context, socketProvider, child) {
+                return Row(
+                  children: [
+                    Container(
+                      width: 8.w,
+                      height: 8.h,
+                      decoration: BoxDecoration(
+                        color: socketProvider.isConnected
+                            ? Colors.green
+                            : Colors.grey,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      socketProvider.isConnected ? 'Real-time' : 'Offline',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: socketProvider.isConnected
+                            ? Colors.green
+                            : Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -57,8 +125,9 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
         children: [
           Expanded(
             child: Consumer<MessageDetailsProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading) {
+              builder: (context, restProvider, child) {
+                // Always show REST API messages for consistency
+                if (restProvider.isLoading) {
                   return ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     shrinkWrap: true,
@@ -68,15 +137,17 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
                   );
                 }
 
-                if (provider.messages.isEmpty) {
+                final messages = restProvider.messages;
+
+                if (messages.isEmpty) {
                   return const Center(child: Text('No messages found'));
                 }
 
                 return ListView.builder(
                   padding: EdgeInsets.all(16.w),
-                  itemCount: provider.messages.length,
+                  itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final message = provider.messages[index];
+                    final message = messages[index];
                     return MessageWidget(message: message);
                   },
                 );
@@ -87,6 +158,72 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _pickFiles() async {
+    try {
+      final List<XFile> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        setState(() {
+          _selectedFiles.addAll(images.map((xfile) => File(xfile.path)));
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking files: $e');
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    if (_messageController.text.trim().isEmpty && _selectedFiles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a message or attach files')),
+      );
+      return;
+    }
+
+    // final socketProvider = Provider.of<MessageSocketProvider>(
+    //   context,
+    //   listen: false,
+    // );
+    final sendProvider = Provider.of<MessageSendProvider>(
+      context,
+      listen: false,
+    );
+    final detailsProvider = Provider.of<MessageDetailsProvider>(
+      context,
+      listen: false,
+    );
+
+    final messageText = _messageController.text.trim();
+    final hasFiles = _selectedFiles.isNotEmpty;
+
+    // Always send via REST API POST request
+    final success = await sendProvider.sendMessage(
+      caseId: widget.caseId,
+      content: messageText,
+      attachments: hasFiles ? _selectedFiles : null,
+    );
+
+    if (success) {
+      _messageController.clear();
+      setState(() {
+        _selectedFiles.clear();
+      });
+
+      // Wait a bit for backend to process images, then refresh
+      await Future.delayed(const Duration(milliseconds: 500));
+      await detailsProvider.fetchMessageDetails(widget.caseId);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              sendProvider.errorMessage ?? 'Failed to send message',
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildMessageInput() {
@@ -102,33 +239,132 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: Icon(Icons.attach_file, color: Colors.grey.shade600),
-            onPressed: () {},
-          ),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              child: Text(
-                'Enter your message',
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 15.sp),
+          // Show selected files
+          if (_selectedFiles.isNotEmpty) ...[
+            Container(
+              height: 80.h,
+              margin: EdgeInsets.only(bottom: 8.h),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _selectedFiles.length,
+                itemBuilder: (context, index) {
+                  return Stack(
+                    children: [
+                      Container(
+                        width: 80.w,
+                        height: 80.h,
+                        margin: EdgeInsets.only(right: 8.w),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.r),
+                          child: Image.file(
+                            _selectedFiles[index],
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 4.h,
+                        right: 12.w,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedFiles.removeAt(index);
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 12.sp,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
-          ),
-          SizedBox(width: 8.w),
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFF5B7C99),
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Icon(Icons.send, color: Colors.white, size: 20.sp),
+          ],
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.attach_file, color: Colors.grey.shade600),
+                onPressed: _pickFiles,
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your message',
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 15.sp,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24.r),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
+                  ),
+                  maxLines: null,
+                  textInputAction: TextInputAction.newline,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Consumer2<MessageSendProvider, MessageSocketProvider>(
+                builder: (context, sendProvider, socketProvider, child) {
+                  final isLoading = sendProvider.isLoading;
+                  final isConnected = socketProvider.isConnected;
+
+                  return GestureDetector(
+                    onTap: isLoading ? null : _sendMessage,
+                    child: Container(
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: isLoading
+                            ? Colors.grey.shade400
+                            : (isConnected
+                                  ? const Color(
+                                      0xFF2ECC71,
+                                    ) // Green when connected
+                                  : const Color(
+                                      0xFF5B7C99,
+                                    )), // Blue when offline
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: isLoading
+                          ? SizedBox(
+                              width: 20.sp,
+                              height: 20.sp,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(Icons.send, color: Colors.white, size: 20.sp),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -257,8 +493,6 @@ class MessageWidget extends StatelessWidget {
           padding: EdgeInsets.only(right: 8.w),
           child: GestureDetector(
             onTap: () {
-              // If it's the last image with more images, show scrollable gallery
-              // Otherwise show full screen viewer
               if (isLast) {
                 Navigator.push(
                   context,
@@ -298,34 +532,28 @@ class MessageWidget extends StatelessWidget {
                     },
                   ),
                 ),
-                if (isLast)
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.r),
-                      child: Container(
+                // Image count indicator - only on last image
+                if (index == displayCount - 1)
+                  Positioned(
+                    top: 6.h,
+                    right: 6.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.6),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '+$remainingCount',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                'View All',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11.sp,
-                                ),
-                              ),
-                            ],
-                          ),
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Text(
+                        imageUrls.length > 3
+                            ? '+${imageUrls.length}'
+                            : '${imageUrls.length}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
