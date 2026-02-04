@@ -119,7 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   CustomButton(
                     buttonText: 'Sign Up',
                     isLoading: provider.isLoading,
-                    onPressed: () {
+                    onPressed: () async {
                       final fullName = _usernameController.text.trim();
                       final email = _emailController.text.trim();
                       final copID = _copIdController.text.trim();
@@ -129,6 +129,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           email.isEmpty ||
                           copID.isEmpty ||
                           password.isEmpty) {
+                        if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Please fill in all fields.'),
@@ -138,6 +139,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       }
 
                       if (password != _confirmPasswordController.text.trim()) {
+                        if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Passwords do not match.'),
@@ -147,6 +149,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       }
 
                       if (password.length < 6) {
+                        if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -157,20 +160,20 @@ class _SignupScreenState extends State<SignupScreen> {
                         return;
                       }
 
-                      provider.signUp(fullName, email, copID, password).then((
-                        _,
-                      ) {
-                        if (provider.errorMessage == null) {
-                          VerificationPage.show(
-                            context,
-                            otpSource: OtpSource.signup,
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(provider.errorMessage!)),
-                          );
-                        }
-                      });
+                      await provider.signUp(fullName, email, copID, password);
+
+                      if (!mounted) return;
+
+                      if (provider.errorMessage == null) {
+                        VerificationPage.show(
+                          context,
+                          otpSource: OtpSource.signup,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(provider.errorMessage!)),
+                        );
+                      }
                     },
                   ),
                   AppSpacing.h18,
@@ -183,7 +186,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          Navigator.of(context).push(
+                          if (!mounted) return;
+                          Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => const SignInScreen(),
                             ),

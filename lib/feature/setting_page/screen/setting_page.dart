@@ -171,42 +171,32 @@ class _SettingPageState extends State<SettingPage> {
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: ListTile(
-                  onTap: () {
-                    showDialog(
+                  onTap: () async {
+                    // Show confirmation dialog
+                    final shouldLogout = await showDialog<bool>(
                       context: context,
-                      builder: (_) => AlertDialog(
-                        title: Text('Log Out', style: AppStyle.semiBook16),
-                        content: Text(
-                          'Are you sure you want to log out?',
-                          style: AppStyle.book14,
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(
-                              'Cancel',
-                              style: AppStyle.semiBook14.copyWith(
-                                color: AppColors.greyText,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          title: Text('Log Out', style: AppStyle.semiBook16),
+                          content: Text(
+                            'Are you sure you want to log out?',
+                            style: AppStyle.book14,
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(dialogContext, false);
+                              },
+                              child: Text(
+                                'Cancel',
+                                style: AppStyle.semiBook14.copyWith(
+                                  color: AppColors.greyText,
+                                ),
                               ),
                             ),
-                          ),
-                          Consumer<SigninProvider>(
-                            builder: (context, ref, _) => TextButton(
+                            TextButton(
                               onPressed: () {
-                                ref.logout();
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const SignInScreen(),
-                                  ),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Logged out successfully.'),
-                                  ),
-                                );
+                                Navigator.pop(dialogContext, true);
                               },
                               child: Text(
                                 'Log Out',
@@ -215,9 +205,33 @@ class _SettingPageState extends State<SettingPage> {
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        );
+                      },
+                    );
+
+                    // If user cancelled, return early
+                    if (shouldLogout != true) return;
+
+                    // Get the provider
+                    if (!context.mounted) return;
+                    final provider = Provider.of<SigninProvider>(
+                      context,
+                      listen: false,
+                    );
+
+                    // Perform logout
+                    await provider.logout();
+
+                    // Check if widget is still mounted before navigation
+                    if (!context.mounted) return;
+
+                    // Navigate to SignIn screen and remove all previous routes
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const SignInScreen(),
                       ),
+                      (route) => false,
                     );
                   },
                   leading: Icon(

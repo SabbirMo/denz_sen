@@ -24,6 +24,7 @@ class _CloseCaseScreenState extends State<CloseCaseScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<MyCasesProvider>().fetchMyCases(status: 'Closed');
     });
   }

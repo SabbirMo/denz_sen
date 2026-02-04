@@ -21,23 +21,22 @@ class PendingCaseScreen extends StatefulWidget {
 
 class _PendingCaseScreenState extends State<PendingCaseScreen> {
   int? expandedIndex;
+  MyCasesPendingDispatchProvider? _dispatchProvider;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<MyCasesProvider>().fetchMyCases(status: 'Pending');
-      context.read<MyCasesPendingDispatchProvider>().addListener(
-        _handleDispatchResult,
-      );
+      _dispatchProvider = context.read<MyCasesPendingDispatchProvider>();
+      _dispatchProvider?.addListener(_handleDispatchResult);
     });
   }
 
   @override
   void dispose() {
-    context.read<MyCasesPendingDispatchProvider>().removeListener(
-      _handleDispatchResult,
-    );
+    _dispatchProvider?.removeListener(_handleDispatchResult);
     super.dispose();
   }
 

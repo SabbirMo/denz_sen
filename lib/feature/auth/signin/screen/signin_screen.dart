@@ -85,6 +85,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     alignment: Alignment.centerRight,
                     child: InkWell(
                       onTap: () {
+                        if (!mounted) return;
                         ForgotPasswordBottomSheet.show(context);
                       },
                       child: Text(
@@ -102,13 +103,14 @@ class _SignInScreenState extends State<SignInScreen> {
                   CustomButton(
                     buttonText: 'Sign In',
                     isLoading: provider.isLoading,
-                    onPressed: () {
+                    onPressed: () async {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text.trim();
 
                       if (email.isEmpty || password.isEmpty) {
+                        if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text('Please enter email and password'),
                           ),
                         );
@@ -117,28 +119,30 @@ class _SignInScreenState extends State<SignInScreen> {
 
                       debugPrint('Email: $email, Password: $password');
 
-                      provider.signin(email, password).then((success) {
-                        if (success) {
-                          debugPrint('Signin Successful - Navigating to Home');
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
+                      final success = await provider.signin(email, password);
+
+                      if (!mounted) return;
+
+                      if (success) {
+                        debugPrint('Signin Successful - Navigating to Home');
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              provider.errorMessage ??
+                                  'Signin failed. Please try again.',
                             ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                provider.errorMessage ??
-                                    'Signin failed. Please try again. ${provider.errorMessage}',
-                              ),
-                            ),
-                          );
-                          debugPrint(
-                            'Signin Failed - Showing Error: ${provider.errorMessage}',
-                          );
-                        }
-                      });
+                          ),
+                        );
+                        debugPrint(
+                          'Signin Failed - Showing Error: ${provider.errorMessage}',
+                        );
+                      }
                     },
                     width: double.infinity,
                   ),
@@ -152,6 +156,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       InkWell(
                         onTap: () {
+                          if (!mounted) return;
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => const SignupScreen(),

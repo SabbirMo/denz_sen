@@ -25,6 +25,7 @@ class _ActiveCaseScreenState extends State<ActiveCaseScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<MyCasesProvider>().fetchMyCases(status: 'Active');
     });
   }

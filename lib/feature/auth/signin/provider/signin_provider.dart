@@ -121,15 +121,15 @@ class SigninProvider extends ChangeNotifier {
             errorMessage = details.isNotEmpty
                 ? details[0]
                 : 'An unknown error occurred.';
-            debugPrint('❌ Error Message (List): $errorMessage');
-            debugPrint('❌ Full Details List: $details');
+            debugPrint('Error Message (List): $errorMessage');
+            debugPrint('Full Details List: $details');
           } else {
             errorMessage = 'An unknown error occurred.';
-            debugPrint('❌ Error Message (Unknown): $errorMessage');
+            debugPrint('Error Message (Unknown): $errorMessage');
           }
         } else {
           errorMessage = 'An unknown error occurred.';
-          debugPrint('❌ Error Message (No Detail): $errorMessage');
+          debugPrint('Error Message (No Detail): $errorMessage');
         }
 
         debugPrint('========================================');
@@ -161,6 +161,7 @@ class SigninProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     debugPrint('========== Starting Logout ==========');
+
     try {
       final prefs = await SharedPreferences.getInstance();
 

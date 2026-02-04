@@ -73,7 +73,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
     // Show confirmation dialog before closing case
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Close Case'),
           content: Text(
@@ -82,29 +82,29 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel'),
             ),
             Consumer<CloseCasesProvider>(
               builder: (context, ref, _) => TextButton(
                 onPressed: () async {
-                  // Save references before any async operations
-                  final navigator = Navigator.of(context);
-                  final scaffoldMessenger = ScaffoldMessenger.of(context);
-
                   // Close the dialog first
-                  navigator.pop();
+                  Navigator.pop(dialogContext);
 
                   // Close the case
                   await ref.caseClose(widget.caseId);
 
-                  // Show success message using saved reference
-                  scaffoldMessenger.showSnackBar(
+                  // Check if widget is still mounted before using context
+                  if (!mounted) return;
+
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Case closed successfully')),
                   );
 
                   // Navigate back to message list screen
-                  navigator.pop(true);
+                  if (!mounted) return;
+                  Navigator.pop(context, true);
                 },
                 child: const Text(
                   'Close Case',
