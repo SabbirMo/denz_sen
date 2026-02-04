@@ -249,7 +249,10 @@ class _PendingCaseScreenState extends State<PendingCaseScreen> {
                                       backgroundColor: AppColors.border,
                                       textColor: AppColors.black,
                                       onPressed: () {
-                                        CaseCloseBottomSheet.show(context);
+                                        CaseCloseBottomSheet.show(
+                                          context,
+                                          CaseCloseAction.okay,
+                                        );
                                       },
                                     ),
                                   ),

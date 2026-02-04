@@ -5,8 +5,10 @@ import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+enum CaseCloseAction { seeDetails, okay }
+
 class CaseCloseBottomSheet {
-  static void show(BuildContext context) {
+  static void show(BuildContext context, CaseCloseAction action) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -44,38 +46,51 @@ class CaseCloseBottomSheet {
                 AppSpacing.h10,
                 Text('Case Closed', style: AppStyle.semiBook20),
                 AppSpacing.h8,
-                Text(
-                  '+20 Points',
-                  style: AppStyle.semiBook16.copyWith(color: AppColors.green),
-                ),
-                AppSpacing.h8,
-                Text(
-                  'Case #00009 was solved and marked as closed. Great work!',
-                  style: AppStyle.book14,
-                  textAlign: TextAlign.center,
-                ),
+                if (action == CaseCloseAction.seeDetails) ...[
+                  Text(
+                    '+20 Points',
+                    style: AppStyle.semiBook16.copyWith(color: AppColors.green),
+                  ),
+                  AppSpacing.h8,
+                  Text(
+                    'Case #00009 was solved and marked as closed. Great work!',
+                    style: AppStyle.book14,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
                 AppSpacing.h20,
                 Row(
                   children: [
-                    Expanded(
-                      child: CustomButton(
-                        buttonText: "See Details",
-                        backgroundColor: AppColors.border,
-                        textColor: AppColors.black,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                    if (action == CaseCloseAction.seeDetails) ...[
+                      Expanded(
+                        child: CustomButton(
+                          buttonText: "See Details",
+                          backgroundColor: AppColors.border,
+                          textColor: AppColors.black,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
-                    ),
+                      Expanded(
+                        child: CustomButton(
+                          buttonText: "Okay",
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ],
                     SizedBox(width: 16.w),
-                    Expanded(
-                      child: CustomButton(
-                        buttonText: "Okay",
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                    if (action == CaseCloseAction.okay)
+                      Expanded(
+                        child: CustomButton(
+                          buttonText: "Okay",
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
-                    ),
                   ],
                 ),
 

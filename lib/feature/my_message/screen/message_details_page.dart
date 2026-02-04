@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:denz_sen/feature/my_message/provider/close_cases_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_details_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
 import 'package:denz_sen/feature/my_message/screen/my_message_screen.dart';
-import 'package:denz_sen/feature/my_message/widget/close_case_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -63,8 +63,58 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
   }
 
   void _addMember() {
+    // TODO: Implement add member functionality
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Add Member feature coming soon')),
+    );
+  }
+
+  void _closeCase() {
+    // Show confirmation dialog before closing case
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Close Case'),
+          content: Text(
+            'Are you sure you want to close this case?',
+            style: TextStyle(fontSize: 15.sp),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            Consumer<CloseCasesProvider>(
+              builder: (context, ref, _) => TextButton(
+                onPressed: () async {
+                  // Save references before any async operations
+                  final navigator = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                  // Close the dialog first
+                  navigator.pop();
+
+                  // Close the case
+                  await ref.caseClose(widget.caseId);
+
+                  // Show success message using saved reference
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('Case closed successfully')),
+                  );
+
+                  // Navigate back to message list screen
+                  navigator.pop(true);
+                },
+                child: const Text(
+                  'Close Case',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -167,7 +217,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
               if (value == 'add_member') {
                 _addMember();
               } else if (value == 'close_case') {
-                CloseCaseDialog.show(context, onConfirm: () {});
+                _closeCase();
               }
             },
           ),

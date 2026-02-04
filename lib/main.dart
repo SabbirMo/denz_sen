@@ -7,6 +7,7 @@ import 'package:denz_sen/feature/change_password/provider/change_password_provid
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_provider.dart';
+import 'package:denz_sen/feature/my_message/provider/close_cases_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_details_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
@@ -35,6 +36,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => MessageSendProvider()),
         ChangeNotifierProvider(create: (_) => MessageSocketProvider()),
         ChangeNotifierProvider(create: (_) => MyCasesPendingDispatchProvider()),
+        ChangeNotifierProvider(create: (_) => CloseCasesProvider()),
       ],
       child: const MyApp(),
     ),

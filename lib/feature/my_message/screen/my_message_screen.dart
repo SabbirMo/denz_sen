@@ -18,13 +18,15 @@ class MyMessageScreen extends StatefulWidget {
   State<MyMessageScreen> createState() => _MyMessageScreenState();
 }
 
-class _MyMessageScreenState extends State<MyMessageScreen> {
+class _MyMessageScreenState extends State<MyMessageScreen>
+    with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
@@ -37,7 +39,16 @@ class _MyMessageScreenState extends State<MyMessageScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && mounted) {
+      Provider.of<MyMessageProvider>(context, listen: false).fatchMessage();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
@@ -80,89 +91,105 @@ class _MyMessageScreenState extends State<MyMessageScreen> {
           icon: Icon(Icons.arrow_back_ios_new_outlined),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xfff9f9f7),
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: false,
-                  decoration: InputDecoration(
-                    hintText: 'Search messages',
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                            },
-                          )
-                        : null,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Provider.of<MyMessageProvider>(
+            context,
+            listen: false,
+          ).fatchMessage();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xfff9f9f7),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: false,
+                    decoration: InputDecoration(
+                      hintText: 'Search messages',
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                            )
+                          : null,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
                   ),
                 ),
-              ),
-              AppSpacing.h18,
-              Consumer<MyMessageProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
+                AppSpacing.h18,
+                Consumer<MyMessageProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: 5,
+                        itemBuilder: (context, index) => MessageShimmer(),
+                      );
+                    }
+
+                    final filteredMessages = _filterMessages(provider.messages);
+
+                    if (filteredMessages.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 50.h),
+                          child: Text(
+                            _searchQuery.isEmpty
+                                ? 'No messages found'
+                                : 'No messages match your search',
+                            style: AppStyle.medium14.copyWith(
+                              color: AppColors.lightGrey,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: 5,
-                      itemBuilder: (context, index) => MessageShimmer(),
+                      itemCount: filteredMessages.length,
+                      itemBuilder: (context, index) {
+                        final message = filteredMessages[index];
+                        return MyMessageCaseWidget(
+                          message: message,
+                          onTap: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MessageDetailsPage(caseId: message.id),
+                              ),
+                            );
+                            // Refresh if case was closed
+                            if (result == true && mounted) {
+                              Provider.of<MyMessageProvider>(
+                                context,
+                                listen: false,
+                              ).fatchMessage();
+                            }
+                          },
+                        );
+                      },
                     );
-                  }
-
-                  final filteredMessages = _filterMessages(provider.messages);
-
-                  if (filteredMessages.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 50.h),
-                        child: Text(
-                          _searchQuery.isEmpty
-                              ? 'No messages found'
-                              : 'No messages match your search',
-                          style: AppStyle.medium14.copyWith(
-                            color: AppColors.lightGrey,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: filteredMessages.length,
-                    itemBuilder: (context, index) {
-                      final message = filteredMessages[index];
-                      return MyMessageCaseWidget(
-                        message: message,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  MessageDetailsPage(caseId: message.id),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
