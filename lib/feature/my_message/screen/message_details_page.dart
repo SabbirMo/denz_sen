@@ -11,9 +11,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class MessageDetailsPage extends StatefulWidget {
-  const MessageDetailsPage({super.key, required this.caseId});
+  const MessageDetailsPage({super.key, required this.caseId, this.caseStatus});
 
   final int caseId;
+  final String? caseStatus;
 
   @override
   State<MessageDetailsPage> createState() => _MessageDetailsPageState();
@@ -92,7 +93,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
                   Navigator.pop(dialogContext);
 
                   // Close the case
-                  await ref.caseClose(widget.caseId);
+                  await ref.closeCase(widget.caseId);
 
                   // Check if widget is still mounted before using context
                   if (!mounted) return;
@@ -256,7 +257,36 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
               },
             ),
           ),
-          _buildMessageInput(),
+          // Show message input only if case is not closed
+          if (widget.caseStatus?.toLowerCase() != 'closed')
+            _buildMessageInput()
+          else
+            _buildClosedCaseMessage(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClosedCaseMessage() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        border: Border(top: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock, color: Colors.grey.shade600, size: 20.sp),
+          SizedBox(width: 8.w),
+          Text(
+            'Case is closed',
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );

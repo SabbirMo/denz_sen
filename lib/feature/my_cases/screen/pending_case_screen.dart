@@ -7,7 +7,7 @@ import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_pro
 import 'package:denz_sen/feature/my_cases/provider/my_cases_provider.dart';
 import 'package:denz_sen/feature/my_cases/widget/case_shimmer.dart';
 import 'package:denz_sen/feature/my_cases/widget/case_status_widget.dart';
-import 'package:denz_sen/feature/success_screen/case_close_bottom_sheet.dart';
+import 'package:denz_sen/feature/my_message/provider/close_cases_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +22,7 @@ class PendingCaseScreen extends StatefulWidget {
 class _PendingCaseScreenState extends State<PendingCaseScreen> {
   int? expandedIndex;
   MyCasesPendingDispatchProvider? _dispatchProvider;
+  CloseCasesProvider? _closeCasesProvider;
 
   @override
   void initState() {
@@ -31,12 +32,16 @@ class _PendingCaseScreenState extends State<PendingCaseScreen> {
       context.read<MyCasesProvider>().fetchMyCases(status: 'Pending');
       _dispatchProvider = context.read<MyCasesPendingDispatchProvider>();
       _dispatchProvider?.addListener(_handleDispatchResult);
+
+      _closeCasesProvider = context.read<CloseCasesProvider>();
+      _closeCasesProvider?.addListener(_handleCloseCaseResult);
     });
   }
 
   @override
   void dispose() {
     _dispatchProvider?.removeListener(_handleDispatchResult);
+    _closeCasesProvider?.removeListener(_handleCloseCaseResult);
     super.dispose();
   }
 
@@ -55,6 +60,32 @@ class _PendingCaseScreenState extends State<PendingCaseScreen> {
         expandedIndex = null;
       });
       // Auto refresh the pending cases list
+      context.read<MyCasesProvider>().fetchMyCases(status: 'Pending');
+    } else if (provider.success == false && provider.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.errorMessage!),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _handleCloseCaseResult() {
+    if (!mounted) return;
+    final provider = context.read<CloseCasesProvider>();
+    if (provider.success == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Case closed successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() {
+        expandedIndex = null;
+      });
       context.read<MyCasesProvider>().fetchMyCases(status: 'Pending');
     } else if (provider.success == false && provider.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -242,18 +273,21 @@ class _PendingCaseScreenState extends State<PendingCaseScreen> {
                                     ),
                                   ),
                                   SizedBox(width: 8.w),
-                                  Expanded(
-                                    child: CustomButton(
-                                      buttonText: 'Close Case',
-                                      backgroundColor: AppColors.border,
-                                      textColor: AppColors.black,
-                                      onPressed: () {
-                                        CaseCloseBottomSheet.show(
-                                          context,
-                                          CaseCloseAction.okay,
-                                        );
-                                      },
-                                    ),
+                                  Consumer<CloseCasesProvider>(
+                                    builder: (context, closeCaseRef, _) =>
+                                        Expanded(
+                                          child: CustomButton(
+                                            isLoading: closeCaseRef.isLoading,
+                                            buttonText: 'Close Case',
+                                            backgroundColor: AppColors.border,
+                                            textColor: AppColors.black,
+                                            onPressed: () {
+                                              closeCaseRef.closeCase(
+                                                caseData.id,
+                                              );
+                                            },
+                                          ),
+                                        ),
                                   ),
                                 ],
                               ),

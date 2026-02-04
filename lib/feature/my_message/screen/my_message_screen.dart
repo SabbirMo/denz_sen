@@ -171,8 +171,10 @@ class _MyMessageScreenState extends State<MyMessageScreen>
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    MessageDetailsPage(caseId: message.id),
+                                builder: (context) => MessageDetailsPage(
+                                  caseId: message.id,
+                                  caseStatus: message.caseStatus,
+                                ),
                               ),
                             );
                             // Refresh if case was closed

@@ -8,10 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CloseCasesProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
+  bool? success;
 
-  Future<void> caseClose(int caseId) async {
+  Future<void> closeCase(int caseId) async {
     isLoading = true;
     errorMessage = null;
+    success = null;
     notifyListeners();
     final uri = Uri.parse('$baseUrl/api/v1/cases/$caseId/close');
 
@@ -33,16 +35,19 @@ class CloseCasesProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         debugPrint('✅ Close case success: $data');
+        success = true;
         isLoading = false;
         notifyListeners();
       } else {
         errorMessage = 'Failed to close case: ${response.statusCode}';
         debugPrint('❌ Close case failed: $errorMessage');
+        success = false;
         isLoading = false;
         notifyListeners();
       }
     } catch (e) {
       isLoading = false;
+      success = false;
       errorMessage = 'Failed to close case: $e';
       debugPrint('❌ Close case exception: $e');
       notifyListeners();
