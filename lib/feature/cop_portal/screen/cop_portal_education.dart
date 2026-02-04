@@ -2,13 +2,28 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/contact_us/screen/contact_us_screen.dart';
+import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
 import 'package:denz_sen/feature/cop_portal/widget/guides_list_view_builder.dart';
 import 'package:denz_sen/feature/cop_portal/widget/video_list_view_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
-class CopPortalEducation extends StatelessWidget {
+class CopPortalEducation extends StatefulWidget {
   const CopPortalEducation({super.key});
+
+  @override
+  State<CopPortalEducation> createState() => _CopPortalEducationState();
+}
+
+class _CopPortalEducationState extends State<CopPortalEducation> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      context.read<EducationProvider>().getEducationHomeData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +36,9 @@ class CopPortalEducation extends StatelessWidget {
             children: [
               Text('Videos', style: AppStyle.semiBook16),
               AppSpacing.h6,
-              VideoListViewBuilder(),
+              const VideoListViewBuilder(),
               Text('Guides', style: AppStyle.semiBook16),
-              GuidesListViewBuilder(),
+              const GuidesListViewBuilder(),
               AppSpacing.h16,
               Container(
                 padding: EdgeInsets.all(12.w),

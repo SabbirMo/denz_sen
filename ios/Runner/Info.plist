@@ -51,5 +51,10 @@
 	<string>This app needs photo library access to select photos</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs access to location when opento track user.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
