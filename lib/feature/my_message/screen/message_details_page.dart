@@ -5,6 +5,7 @@ import 'package:denz_sen/feature/my_message/provider/message_details_provider.da
 import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
 import 'package:denz_sen/feature/my_message/screen/my_message_screen.dart';
+import 'package:denz_sen/feature/my_message/widget/add_member_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,6 +23,7 @@ class MessageDetailsPage extends StatefulWidget {
 
 class _MessageDetailsPageState extends State<MessageDetailsPage> {
   final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   final List<File> _selectedFiles = [];
   final ImagePicker _picker = ImagePicker();
 
@@ -60,15 +62,64 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
   @override
   void dispose() {
     _messageController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  void _addMember() {
-    // TODO: Implement add member functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add Member feature coming soon')),
-    );
-  }
+  // void _addMember() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext dialogContext) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(12.r),
+  //         ),
+  //         backgroundColor: Colors.white,
+  //         child: Padding(
+  //           padding: EdgeInsets.all(16.w),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Text(
+  //                 'Add member to the Case',
+  //                 style: AppStyle.medium14.copyWith(color: AppColors.black),
+  //               ),
+
+  //               AppSpacing.h8,
+
+  //               Container(
+  //                 decoration: BoxDecoration(
+  //                   color: Color(0xfff9f9f7),
+  //                   borderRadius: BorderRadius.circular(8.r),
+  //                   border: Border.all(color: AppColors.border),
+  //                 ),
+  //                 child: TextField(
+  //                   controller: _searchController,
+  //                   autofocus: false,
+  //                   decoration: InputDecoration(
+  //                     hintText: 'Search by name',
+  //                     border: InputBorder.none,
+  //                     suffixIcon: Icon(Icons.search),
+  //                     contentPadding: EdgeInsets.symmetric(
+  //                       horizontal: 10.w,
+  //                       vertical: 12.h,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //               SizedBox(height: 22.h),
+  //               ElevatedButton(
+  //                 onPressed: () => Navigator.pop(dialogContext),
+  //                 child: const Text('OK'),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   void _closeCase() {
     // Show confirmation dialog before closing case
@@ -216,7 +267,10 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
             ],
             onSelected: (String value) {
               if (value == 'add_member') {
-                _addMember();
+                showDialog(
+                  context: context,
+                  builder: (_) => AddMemberScreen(caseId: widget.caseId),
+                );
               } else if (value == 'close_case') {
                 _closeCase();
               }
