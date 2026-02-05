@@ -2,9 +2,11 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
+import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class CustomHomeAppBar extends StatelessWidget {
   const CustomHomeAppBar({
@@ -24,9 +26,21 @@ class CustomHomeAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 26.r,
-          backgroundImage: AssetImage(profileImagePath),
+        Consumer<ProfileShowProvider>(
+          builder: (_, ref, _) => CircleAvatar(
+            radius: 26.r,
+            backgroundColor: AppColors.grey.withValues(alpha: 0.1),
+            backgroundImage:
+                ref.profile?.avatarUrl != null &&
+                    ref.profile!.avatarUrl!.isNotEmpty
+                ? NetworkImage(ref.profile!.avatarUrl!) as ImageProvider
+                : null,
+            child:
+                ref.profile?.avatarUrl == null ||
+                    ref.profile!.avatarUrl!.isEmpty
+                ? Icon(Icons.person, size: 30.r, color: AppColors.primaryColor)
+                : null,
+          ),
         ),
         AppSpacing.w14,
         GestureDetector(

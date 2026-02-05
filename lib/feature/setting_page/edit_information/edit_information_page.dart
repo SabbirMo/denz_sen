@@ -42,12 +42,10 @@ class _EditInformationPageState extends State<EditInformationPage> {
       setState(() {
         imageFile = pickedFile;
       });
-    }
-    else {
+    } else {
       debugPrint('No image selected.');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +67,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
                     CircleAvatar(
                       radius: 42.r,
                       backgroundImage: imageFile != null
-                          ? FileImage(
-                              File(imageFile!.path),
-                            ) as ImageProvider
+                          ? FileImage(File(imageFile!.path)) as ImageProvider
                           : AssetImage('assets/images/profile.png'),
                     ),
                     Positioned(
@@ -101,6 +97,14 @@ class _EditInformationPageState extends State<EditInformationPage> {
               AppSpacing.h12,
               Text('Profile Info', style: AppStyle.semiBook16),
               AppSpacing.h10,
+              CustomField(
+                title: "Full Name",
+                hintText: "Enter your  name",
+                controller: phoneNumberController,
+                prefixIcon: Icon(Icons.person_outline),
+              ),
+
+              AppSpacing.h4,
               CustomField(
                 title: "Phone Number",
                 hintText: "Enter your phone number",
@@ -135,7 +139,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
                 controller: zipCodeController,
               ),
               AppSpacing.h20,
-              CustomButton(buttonText: 'Save', onPressed: (){}),
+              CustomButton(buttonText: 'Save', onPressed: () {}),
               AppSpacing.h20,
             ],
           ),

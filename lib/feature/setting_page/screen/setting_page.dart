@@ -4,6 +4,7 @@ import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
 import 'package:denz_sen/feature/auth/signin/screen/signin_screen.dart';
 import 'package:denz_sen/feature/change_password/screen/change_password_screen.dart';
+import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
 import 'package:denz_sen/feature/setting_page/edit_information/edit_information_page.dart';
@@ -51,39 +52,66 @@ class _SettingPageState extends State<SettingPage> {
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 42.r,
-                backgroundImage: AssetImage('assets/images/profile.png'),
+              Consumer<ProfileShowProvider>(
+                builder: (_, ref, _) => Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 42.r,
+                      backgroundColor: AppColors.grey.withValues(alpha: 0.1),
+                      backgroundImage:
+                          ref.profile?.avatarUrl != null &&
+                              ref.profile!.avatarUrl!.isNotEmpty
+                          ? NetworkImage(ref.profile!.avatarUrl!)
+                                as ImageProvider
+                          : null,
+                      child:
+                          ref.profile?.avatarUrl == null ||
+                              ref.profile!.avatarUrl!.isEmpty
+                          ? Icon(
+                              Icons.person,
+                              size: 30.r,
+                              color: AppColors.primaryColor,
+                            )
+                          : null,
+                    ),
+                    AppSpacing.h10,
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Profile Info', style: AppStyle.semiBook16),
+                    ),
+                    AppSpacing.h8,
+                    CaseRowWidget(
+                      slotsText: 'Name',
+                      slotsValue: ref.profile?.fullName ?? 'user',
+                    ),
+                    CaseRowWidget(
+                      slotsText: 'COP ID',
+                      slotsValue: ref.profile?.copId ?? 'A157Z239526',
+                    ),
+                    CaseRowWidget(
+                      slotsText: 'Email',
+                      slotsValue: ref.profile?.email ?? 'jacktyler@gmail.com',
+                    ),
+                    CaseRowWidget(
+                      slotsText: 'Phone Number',
+                      slotsValue: ref.profile?.phone ?? '999-222-4444',
+                    ),
+                    AppSpacing.h10,
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Address Info', style: AppStyle.semiBook16),
+                    ),
+                    AppSpacing.h8,
+                    CaseRowWidget(
+                      slotsText: 'Address',
+                      slotsValue: '1234 Main St.',
+                    ),
+                    CaseRowWidget(slotsText: 'City', slotsValue: 'Cape Coral'),
+                    CaseRowWidget(slotsText: 'State', slotsValue: 'Florida'),
+                    CaseRowWidget(slotsText: 'Zip Code', slotsValue: '33993'),
+                  ],
+                ),
               ),
-              AppSpacing.h10,
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Profile Info', style: AppStyle.semiBook16),
-              ),
-              AppSpacing.h8,
-              CaseRowWidget(slotsText: 'Name', slotsValue: 'Jack Tyler'),
-              CaseRowWidget(
-                slotsText: 'COP ID',
-                slotsValue: 'jacktyler@A157Z239526',
-              ),
-              CaseRowWidget(
-                slotsText: 'Email',
-                slotsValue: 'jacktyler@gmail.com',
-              ),
-              CaseRowWidget(
-                slotsText: 'Phone Number',
-                slotsValue: '999-222-4444',
-              ),
-              AppSpacing.h10,
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Address Info', style: AppStyle.semiBook16),
-              ),
-              AppSpacing.h8,
-              CaseRowWidget(slotsText: 'Address', slotsValue: '1234 Main St.'),
-              CaseRowWidget(slotsText: 'City', slotsValue: 'Cape Coral'),
-              CaseRowWidget(slotsText: 'State', slotsValue: 'Florida'),
-              CaseRowWidget(slotsText: 'Zip Code', slotsValue: '33993'),
               AppSpacing.h10,
               Align(
                 alignment: Alignment.centerLeft,

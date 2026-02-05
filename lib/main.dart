@@ -9,6 +9,7 @@ import 'package:denz_sen/feature/cop_portal/provider/cop_portal_comms_provider.d
 import 'package:denz_sen/feature/cop_portal/provider/cop_portal_message_send.dart';
 import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
+import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/close_cases_provider.dart';
@@ -45,6 +46,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => CopPortalCommsProvider()),
         ChangeNotifierProvider(create: (_) => CopPortalMessageSendProvider()),
         ChangeNotifierProvider(create: (_) => ContactUsProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileShowProvider()),
       ],
       child: const MyApp(),
     ),

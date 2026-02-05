@@ -3,6 +3,7 @@ import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/cop_portal/screen/cop_portal_screen.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
+import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_home_tab_bar.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
 import 'package:denz_sen/feature/my_cases/screen/my_cases_screen.dart';
@@ -52,7 +53,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _onTapGetMyLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _onTapGetMyLocation();
+      _loadProfile();
+    });
+  }
+
+  Future<void> _loadProfile() async {
+    if (!mounted) return;
+    final provider = Provider.of<ProfileShowProvider>(context, listen: false);
+    await provider.showProfile();
   }
 
   @override
@@ -63,15 +73,17 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         toolbarHeight: 60.h,
         automaticallyImplyLeading: false,
-        title: CustomHomeAppBar(
-          userName: 'Jack Tyler',
-          onLeaderboardTap: () {},
-          onSettingsTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingPage()),
-            );
-          },
+        title: Consumer<ProfileShowProvider>(
+          builder: (context, ref, _) => CustomHomeAppBar(
+            userName: ref.profile?.fullName ?? 'User',
+            onLeaderboardTap: () {},
+            onSettingsTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingPage()),
+              );
+            },
+          ),
         ),
       ),
       body: SafeArea(
