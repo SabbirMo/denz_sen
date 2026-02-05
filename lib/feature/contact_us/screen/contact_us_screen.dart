@@ -2,9 +2,11 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
+import 'package:denz_sen/feature/contact_us/provider/contact_us_provider.dart';
 import 'package:denz_sen/feature/contact_us/widget/contact_details_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class ContactUsScreen extends StatefulWidget {
   const ContactUsScreen({super.key});
@@ -14,10 +16,12 @@ class ContactUsScreen extends StatefulWidget {
 }
 
 class _ContactUsScreenState extends State<ContactUsScreen> {
+  final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _issueController = TextEditingController();
 
   @override
   void dispose() {
+    _subjectController.dispose();
     _issueController.dispose();
     super.dispose();
   }
@@ -46,17 +50,26 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
               AppSpacing.h12,
               Text('Subject', style: AppStyle.book14),
               AppSpacing.h12,
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(8.r),
-                  color: Color(0xfff9f6f7),
-                ),
-                child: Text(
-                  'How to track my submitted case?',
-                  style: AppStyle.book16,
+              TextField(
+                autofocus: false,
+                controller: _subjectController,
+                decoration: InputDecoration(
+                  hintText: 'Subject',
+                  hintStyle: AppStyle.book14.copyWith(
+                    color: AppColors.lightGrey,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: AppColors.primaryColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
                 ),
               ),
               AppSpacing.h18,
@@ -84,10 +97,75 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                 ),
               ),
               AppSpacing.h22,
-              CustomButton(
-                buttonText: 'Submit',
-                onPressed: () {
-                  debugPrint('Issue Submitted');
+              Consumer<ContactUsProvider>(
+                builder: (context, provider, child) {
+                  return CustomButton(
+                    buttonText: 'Submit',
+                    isLoading: provider.isLoading,
+                    onPressed: provider.isLoading
+                        ? null
+                        : () async {
+                            final contactProvider =
+                                Provider.of<ContactUsProvider>(
+                                  context,
+                                  listen: false,
+                                );
+
+                            // Validation
+                            if (_subjectController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please enter a subject'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            if (_issueController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please describe your issue'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Call API
+                            final success = await contactProvider.sendContactUs(
+                              subject: _subjectController.text.trim(),
+                              description: _issueController.text.trim(),
+                            );
+
+                            if (context.mounted) {
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      contactProvider.successMessage ??
+                                          'Message sent successfully',
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                // Clear fields
+                                _subjectController.clear();
+                                _issueController.clear();
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      contactProvider.errorMessage ??
+                                          'Failed to send message',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                  );
                 },
               ),
               AppSpacing.h18,

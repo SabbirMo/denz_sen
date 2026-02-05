@@ -206,7 +206,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           CustomGridCard(
                             imagePath: 'assets/svgs/message.svg',
                             title: 'My Messages',
-                            showBadge: true,
                             badgeCount: 2,
                             onTap: () {
                               Navigator.push(
