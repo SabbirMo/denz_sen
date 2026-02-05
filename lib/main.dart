@@ -4,6 +4,8 @@ import 'package:denz_sen/feature/auth/new_password/provider/new_password_provide
 import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
 import 'package:denz_sen/feature/auth/singup/provider/singup_provider.dart';
 import 'package:denz_sen/feature/change_password/provider/change_password_provider.dart';
+import 'package:denz_sen/feature/cop_portal/provider/cop_portal_comms_provider.dart';
+import 'package:denz_sen/feature/cop_portal/provider/cop_portal_message_send.dart';
 import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
@@ -39,6 +41,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => MyCasesPendingDispatchProvider()),
         ChangeNotifierProvider(create: (_) => CloseCasesProvider()),
         ChangeNotifierProvider(create: (_) => EducationProvider()),
+        ChangeNotifierProvider(create: (_) => CopPortalCommsProvider()),
+        ChangeNotifierProvider(create: (_) => CopPortalMessageSendProvider()),
       ],
       child: const MyApp(),
     ),
