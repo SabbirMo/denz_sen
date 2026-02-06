@@ -263,7 +263,7 @@ class _SettingPageState extends State<SettingPage> {
                     );
                   },
                   leading: Icon(
-                    IconData(0xe3b3, fontFamily: 'MaterialIcons'),
+                    Icons.logout,
                     color: AppColors.red,
                   ),
                   title: Text(
