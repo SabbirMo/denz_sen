@@ -8,6 +8,7 @@ import 'package:denz_sen/feature/contact_us/provider/contact_us_provider.dart';
 import 'package:denz_sen/feature/cop_portal/provider/cop_portal_comms_provider.dart';
 import 'package:denz_sen/feature/cop_portal/provider/cop_portal_message_send.dart';
 import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
+import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
@@ -17,7 +18,9 @@ import 'package:denz_sen/feature/my_message/provider/message_details_provider.da
 import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/my_message_provider.dart';
+import 'package:denz_sen/feature/setting_page/provider/edit_information_provider.dart';
 import 'package:denz_sen/feature/splash/splash_screen.dart';
+import 'package:denz_sen/feature/submit_report/provider/report_submit_provider.dart';
 import 'package:denz_sen/feature/verification/provider/verification_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,6 +50,9 @@ void main() {
         ChangeNotifierProvider(create: (_) => CopPortalMessageSendProvider()),
         ChangeNotifierProvider(create: (_) => ContactUsProvider()),
         ChangeNotifierProvider(create: (_) => ProfileShowProvider()),
+        ChangeNotifierProvider(create: (_) => EditInformationProvider()),
+        ChangeNotifierProvider(create: (_) => DispatchRadiusProvider()),
+        ChangeNotifierProvider(create: (_) => ReportSubmitProvider()),
       ],
       child: const MyApp(),
     ),
@@ -64,7 +70,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppStyle.lightTheme,
-        home: const FullScreenWrapper(child: SplashScreen()),
+        home: FullScreenWrapper(child: SplashScreen()),
       ),
     );
   }

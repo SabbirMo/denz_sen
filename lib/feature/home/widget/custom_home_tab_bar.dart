@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
@@ -33,7 +35,17 @@ class CustomHomeAppBar extends StatelessWidget {
             backgroundImage:
                 ref.profile?.avatarUrl != null &&
                     ref.profile!.avatarUrl!.isNotEmpty
-                ? NetworkImage(ref.profile!.avatarUrl!) as ImageProvider
+                ? (ref.profile!.avatarUrl!.startsWith('http')
+                          ? NetworkImage(ref.profile!.avatarUrl!)
+                          : FileImage(
+                              File(
+                                ref.profile!.avatarUrl!.replaceAll(
+                                  'file://',
+                                  '',
+                                ),
+                              ),
+                            ))
+                      as ImageProvider
                 : null,
             child:
                 ref.profile?.avatarUrl == null ||

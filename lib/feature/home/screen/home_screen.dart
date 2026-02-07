@@ -2,6 +2,7 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/cop_portal/screen/cop_portal_screen.dart';
+import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_home_tab_bar.dart';
@@ -26,25 +27,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   double currentValue = 0;
-
-  // File? image;
-  // final ImagePicker _picker = ImagePicker();
-
-  // Future<void> _pickImage() async {
-  //   try {
-  //     final XFile? pickedFile = await _picker.pickImage(
-  //       source: ImageSource.camera,
-  //       imageQuality: 80,
-  //     );
-  //     if (pickedFile != null) {
-  //       setState(() {
-  //         image = File(pickedFile.path);
-  //       });
-  //     }
-  //   } catch (e) {
-  //     debugPrint('Error picking image: $e');
-  //   }
-  // }
 
   Set<Marker> markers = {};
   GoogleMapController? mapController;
@@ -190,9 +172,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             imagePath: 'assets/svgs/information.svg',
                             title: 'Submit Report',
                             onTap: () {
+                              // Get selected marker position if available
+                              LatLng? selectedLocation;
+                              if (markers.isNotEmpty) {
+                                selectedLocation = markers.first.position;
+                              }
+
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (_) => const SubmitReportScreen(),
+                                  builder: (_) => SubmitReportScreen(
+                                    preSelectedLocation: selectedLocation,
+                                  ),
                                 ),
                               );
                             },
@@ -259,64 +249,123 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               AppSpacing.h12,
-              Container(
-                margin: EdgeInsets.only(bottom: 18.h),
-                padding: EdgeInsets.all(14.w),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Column(
-                  children: [
-                    Row(
+              Consumer<DispatchRadiusProvider>(
+                builder: (context, dispatchProvider, _) {
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 18.h),
+                    padding: EdgeInsets.all(14.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Column(
                       children: [
-                        Text('Dispatch View Range', style: AppStyle.semiBook14),
-                        Spacer(),
-                        Text('150', style: AppStyle.semiBook14),
+                        Row(
+                          children: [
+                            Text(
+                              'Dispatch View Range',
+                              style: AppStyle.semiBook14,
+                            ),
+                            Spacer(),
+                            if (dispatchProvider.isLoading)
+                              SizedBox(
+                                width: 16.w,
+                                height: 16.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.white,
+                                  ),
+                                ),
+                              )
+                            else
+                              Text(
+                                '${currentValue.toInt()}',
+                                style: AppStyle.semiBook14,
+                              ),
+                          ],
+                        ),
+                        AppSpacing.h8,
+                        SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 6.h,
+                            activeTrackColor: AppColors.white.withValues(
+                              alpha: 0.2,
+                            ),
+                            inactiveTrackColor: AppColors.white.withValues(
+                              alpha: 0.2,
+                            ),
+                            thumbColor: AppColors.white,
+                            thumbShape: SquareSliderThumbShape(
+                              thumbSize: 16,
+                              borderRadius: 4,
+                              thumbWidth: 24,
+                            ),
+                            overlayShape: RoundSliderOverlayShape(
+                              overlayRadius: 0,
+                            ),
+                          ),
+                          child: Slider(
+                            value: currentValue,
+                            min: 0,
+                            max: 500,
+                            onChanged: dispatchProvider.isLoading
+                                ? null
+                                : (double newValue) {
+                                    setState(() {
+                                      currentValue = newValue;
+                                    });
+                                  },
+                            onChangeEnd: dispatchProvider.isLoading
+                                ? null
+                                : (double newValue) async {
+                                    final provider =
+                                        Provider.of<DispatchRadiusProvider>(
+                                          context,
+                                          listen: false,
+                                        );
+                                    bool success = await provider
+                                        .updateDispatchRadius(newValue);
+
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).clearSnackBars();
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            success
+                                                ? 'Dispatch radius updated successfully'
+                                                : provider.errorMessage ??
+                                                      'Failed to update dispatch radius',
+                                          ),
+                                          backgroundColor: success
+                                              ? Colors.green
+                                              : Colors.red,
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  },
+                          ),
+                        ),
+                        AppSpacing.h10,
+                        Row(
+                          children: [
+                            Text(
+                              '${currentValue.toInt()} MI',
+                              style: AppStyle.semiBook14,
+                            ),
+                            Spacer(),
+                            Text('500 MI', style: AppStyle.semiBook14),
+                          ],
+                        ),
                       ],
                     ),
-                    AppSpacing.h8,
-                    SliderTheme(
-                      data: SliderThemeData(
-                        trackHeight: 6.h,
-                        activeTrackColor: AppColors.white.withValues(
-                          alpha: 0.2,
-                        ),
-                        inactiveTrackColor: AppColors.white.withValues(
-                          alpha: 0.2,
-                        ),
-                        thumbColor: AppColors.white,
-                        thumbShape: SquareSliderThumbShape(
-                          thumbSize: 16,
-                          borderRadius: 4,
-                          thumbWidth: 24,
-                        ),
-                        overlayShape: RoundSliderOverlayShape(overlayRadius: 0),
-                      ),
-                      child: Slider(
-                        value: currentValue,
-                        min: 0,
-                        max: 500,
-                        onChanged: (double newValue) {
-                          setState(() {
-                            currentValue = newValue;
-                          });
-                        },
-                      ),
-                    ),
-                    AppSpacing.h10,
-                    Row(
-                      children: [
-                        Text(
-                          '${currentValue.toInt()} MI',
-                          style: AppStyle.semiBook14,
-                        ),
-                        Spacer(),
-                        Text('500 MI', style: AppStyle.semiBook14),
-                      ],
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),

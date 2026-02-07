@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
@@ -8,6 +10,7 @@ import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
 import 'package:denz_sen/feature/setting_page/edit_information/edit_information_page.dart';
+import 'package:denz_sen/feature/setting_page/provider/edit_information_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -24,6 +27,15 @@ class _SettingPageState extends State<SettingPage> {
   double currentValue = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Load profile data when page opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileShowProvider>().showProfile();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -37,11 +49,24 @@ class _SettingPageState extends State<SettingPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final profileProvider = context.read<ProfileShowProvider>();
+              final result = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EditInformationPage()),
+                MaterialPageRoute(
+                  builder: (_) => ChangeNotifierProvider(
+                    create: (_) => EditInformationProvider(),
+                    child: EditInformationPage(
+                      profileData: profileProvider.profile,
+                    ),
+                  ),
+                ),
               );
+
+              // Refresh profile if update was successful
+              if (result == true && mounted) {
+                context.read<ProfileShowProvider>().showProfile();
+              }
             },
             icon: Icon(Icons.edit_square),
           ),
@@ -61,7 +86,16 @@ class _SettingPageState extends State<SettingPage> {
                       backgroundImage:
                           ref.profile?.avatarUrl != null &&
                               ref.profile!.avatarUrl!.isNotEmpty
-                          ? NetworkImage(ref.profile!.avatarUrl!)
+                          ? (ref.profile!.avatarUrl!.startsWith('http')
+                                    ? NetworkImage(ref.profile!.avatarUrl!)
+                                    : FileImage(
+                                        File(
+                                          ref.profile!.avatarUrl!.replaceAll(
+                                            'file://',
+                                            '',
+                                          ),
+                                        ),
+                                      ))
                                 as ImageProvider
                           : null,
                       child:
@@ -96,19 +130,10 @@ class _SettingPageState extends State<SettingPage> {
                       slotsText: 'Phone Number',
                       slotsValue: ref.profile?.phone ?? '999-222-4444',
                     ),
-                    AppSpacing.h10,
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Address Info', style: AppStyle.semiBook16),
-                    ),
-                    AppSpacing.h8,
                     CaseRowWidget(
                       slotsText: 'Address',
-                      slotsValue: '1234 Main St.',
+                      slotsValue: ref.profile?.location ?? 'address not found',
                     ),
-                    CaseRowWidget(slotsText: 'City', slotsValue: 'Cape Coral'),
-                    CaseRowWidget(slotsText: 'State', slotsValue: 'Florida'),
-                    CaseRowWidget(slotsText: 'Zip Code', slotsValue: '33993'),
                   ],
                 ),
               ),
@@ -262,10 +287,7 @@ class _SettingPageState extends State<SettingPage> {
                       (route) => false,
                     );
                   },
-                  leading: Icon(
-                    Icons.logout,
-                    color: AppColors.red,
-                  ),
+                  leading: Icon(Icons.logout, color: AppColors.red),
                   title: Text(
                     "Log Out",
                     style: AppStyle.semiBook14.copyWith(color: AppColors.red),
