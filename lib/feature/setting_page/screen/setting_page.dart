@@ -84,24 +84,8 @@ class _SettingPageState extends State<SettingPage> {
                     CircleAvatar(
                       radius: 42.r,
                       backgroundColor: AppColors.grey.withValues(alpha: 0.1),
-                      backgroundImage:
-                          ref.profile?.avatarUrl != null &&
-                              ref.profile!.avatarUrl!.isNotEmpty
-                          ? (ref.profile!.avatarUrl!.startsWith('http')
-                                    ? NetworkImage(ref.profile!.avatarUrl!)
-                                    : FileImage(
-                                        File(
-                                          ref.profile!.avatarUrl!.replaceAll(
-                                            'file://',
-                                            '',
-                                          ),
-                                        ),
-                                      ))
-                                as ImageProvider
-                          : null,
-                      child:
-                          ref.profile?.avatarUrl == null ||
-                              ref.profile!.avatarUrl!.isEmpty
+                      backgroundImage: _getImageProvider(ref),
+                      child: _getImageProvider(ref) == null
                           ? Icon(
                               Icons.person,
                               size: 30.r,
@@ -350,5 +334,28 @@ class _SettingPageState extends State<SettingPage> {
         ),
       ),
     );
+  }
+
+  ImageProvider? _getImageProvider(ProfileShowProvider ref) {
+    if (ref.profile?.avatarUrl == null || ref.profile!.avatarUrl!.isEmpty) {
+      return null;
+    }
+
+    final avatarUrl = ref.profile!.avatarUrl!;
+
+    if (avatarUrl.startsWith('http')) {
+      return NetworkImage(avatarUrl);
+    } else {
+      try {
+        final file = File(avatarUrl.replaceAll('file://', ''));
+        if (file.existsSync()) {
+          return FileImage(file);
+        }
+      } catch (e) {
+        debugPrint('Error loading file image: $e');
+      }
+    }
+
+    return null;
   }
 }

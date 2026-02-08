@@ -134,26 +134,10 @@ class _EditInformationPageState extends State<EditInformationPage> {
                       backgroundColor: AppColors.grey.withValues(alpha: 0.1),
                       backgroundImage: imageFile != null
                           ? FileImage(File(imageFile!.path)) as ImageProvider
-                          : (widget.profileData?.avatarUrl != null &&
-                                    widget.profileData!.avatarUrl!.isNotEmpty
-                                ? (widget.profileData!.avatarUrl!.startsWith(
-                                            'http',
-                                          )
-                                          ? NetworkImage(
-                                              widget.profileData!.avatarUrl!,
-                                            )
-                                          : FileImage(
-                                              File(
-                                                widget.profileData!.avatarUrl!
-                                                    .replaceAll('file://', ''),
-                                              ),
-                                            ))
-                                      as ImageProvider
-                                : null),
+                          : _getImageProviderForEdit(),
                       child:
                           imageFile == null &&
-                              (widget.profileData?.avatarUrl == null ||
-                                  widget.profileData!.avatarUrl!.isEmpty)
+                              _getImageProviderForEdit() == null
                           ? Icon(
                               Icons.person,
                               size: 30.r,
@@ -245,5 +229,29 @@ class _EditInformationPageState extends State<EditInformationPage> {
         ),
       ),
     );
+  }
+
+  ImageProvider? _getImageProviderForEdit() {
+    if (widget.profileData?.avatarUrl == null ||
+        widget.profileData!.avatarUrl!.isEmpty) {
+      return null;
+    }
+
+    final avatarUrl = widget.profileData!.avatarUrl!;
+
+    if (avatarUrl.startsWith('http')) {
+      return NetworkImage(avatarUrl);
+    } else {
+      try {
+        final file = File(avatarUrl.replaceAll('file://', ''));
+        if (file.existsSync()) {
+          return FileImage(file);
+        }
+      } catch (e) {
+        debugPrint('Error loading file image: $e');
+      }
+    }
+
+    return null;
   }
 }

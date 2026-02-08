@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/firebase/firebase_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,6 +89,7 @@ class SigninProvider extends ChangeNotifier {
         stopwatch.reset();
         await Future.wait([
           _prefs!.setString('access_token', accessToken),
+          _prefs!.setString('token', accessToken), // For FCM API
           _prefs!.setString('refresh_token', refreshToken),
           _prefs!.setString('role', role),
         ]);
@@ -103,6 +105,15 @@ class SigninProvider extends ChangeNotifier {
           '✅ Verified Refresh Token Saved: ${savedRefreshToken != null}',
         );
         debugPrint('✅ Verified Role Saved: ${savedRole != null}');
+
+        // Send FCM token to backend
+        debugPrint('📱 Sending FCM token to backend...');
+        try {
+          await FirebaseNotificationService.sendSavedTokenToBackend();
+        } catch (e) {
+          debugPrint('⚠️ FCM token sending error (non-critical): $e');
+        }
+
         debugPrint('🎉 Signin Successful!');
         isLoading = false;
         notifyListeners();
@@ -163,13 +174,25 @@ class SigninProvider extends ChangeNotifier {
     debugPrint('========== Starting Logout ==========');
 
     try {
+      // Delete FCM token from backend first
+      debugPrint('🗑️ Deleting FCM token from backend...');
+      try {
+        await FirebaseNotificationService.deleteToken();
+      } catch (e) {
+        debugPrint('⚠️ FCM token deletion error (non-critical): $e');
+      }
+
       final prefs = await SharedPreferences.getInstance();
 
       // Clear all stored user data
       await prefs.remove('email');
       await prefs.remove('full_name');
       await prefs.remove('access_token');
+      await prefs.remove('token');
       await prefs.remove('refresh_token');
+      await prefs.remove('role');
+      await prefs.remove('fcm_token_sent');
+      await prefs.remove('last_sent_fcm_token');
 
       // Or clear everything
       // await prefs.clear();

@@ -27,8 +27,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart';
 
-void main() {
+/// Background notification handler (must be top-level function)
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('🌙 Background notification received');
+  print('Title: ${message.notification?.title}');
+  print('Body: ${message.notification?.body}');
+  print('Data: ${message.data}');
+}
+
+void main() async {
+  print('🚀 App starting...');
+  WidgetsFlutterBinding.ensureInitialized();
+
+  print('🔥 Initializing Firebase Core...');
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('✅ Firebase Core initialized');
+
+  // Set background message handler
+  print('📬 Setting background message handler...');
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  print('✅ Background handler set');
+
   runApp(
     MultiProvider(
       providers: [
@@ -61,6 +86,9 @@ void main() {
   );
 }
 
+// Global navigator key for accessing context from anywhere
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -70,6 +98,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(375, 812),
       minTextAdapt: true,
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: AppStyle.lightTheme,
         home: SplashScreen(),

@@ -5,6 +5,10 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- Firebase Cloud Messaging Permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     
     <application
@@ -40,8 +44,29 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-          <meta-data android:name="com.google.android.geo.API_KEY"
+        <!-- Google Maps API Key -->
+        <!-- Current: AIzaSyBpD1p4hQ3su-aayuiQ226ZDXQRqK1cIok -->
+        <!-- 
+        ⚠️ If Maps not working:
+        1. Go to: https://console.cloud.google.com/google/maps-apis/credentials
+        2. Enable "Maps SDK for Android"
+        3. Remove API restrictions (for testing)
+        4. Enable billing (required for Maps API)
+        5. Or create NEW API key and replace below
+        -->
+        <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyBpD1p4hQ3su-aayuiQ226ZDXQRqK1cIok"/>
+
+        <!-- Firebase Cloud Messaging -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@android:color/holo_red_dark" />
 
     </application>
     <!-- Required to query activities that can process text, see:
