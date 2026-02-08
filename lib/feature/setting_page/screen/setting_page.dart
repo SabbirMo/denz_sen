@@ -6,6 +6,7 @@ import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
 import 'package:denz_sen/feature/auth/signin/screen/signin_screen.dart';
 import 'package:denz_sen/feature/change_password/screen/change_password_screen.dart';
+import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
 import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
@@ -171,51 +172,96 @@ class _SettingPageState extends State<SettingPage> {
                 child: Text('Dispatch Range', style: AppStyle.semiBook16),
               ),
               AppSpacing.h10,
-              SliderTheme(
-                data: SliderThemeData(
-                  trackHeight: 6.h,
-                  activeTrackColor: AppColors.primaryColor.withValues(
-                    alpha: 0.2,
-                  ),
-                  inactiveTrackColor: AppColors.primaryColor.withValues(
-                    alpha: 0.2,
-                  ),
-                  thumbColor: AppColors.primaryColor,
-                  thumbShape: SquareSliderThumbShape(
-                    thumbSize: 16,
-                    borderRadius: 4,
-                    thumbWidth: 24,
-                  ),
-                  overlayShape: RoundSliderOverlayShape(overlayRadius: 0),
-                ),
-                child: Slider(
-                  value: currentValue,
-                  min: 0,
-                  max: 500,
-                  onChanged: (double newValue) {
-                    setState(() {
-                      currentValue = newValue;
-                    });
-                  },
-                ),
-              ),
-              AppSpacing.h10,
-              Row(
-                children: [
-                  Text(
-                    '${currentValue.toInt()} MI',
-                    style: AppStyle.semiBook14.copyWith(
-                      color: AppColors.greyText,
-                    ),
-                  ),
-                  Spacer(),
-                  Text(
-                    '500 MI',
-                    style: AppStyle.semiBook14.copyWith(
-                      color: AppColors.greyText,
-                    ),
-                  ),
-                ],
+              Consumer<DispatchRadiusProvider>(
+                builder: (context, provider, _) {
+                  return Column(
+                    children: [
+                      SliderTheme(
+                        data: SliderThemeData(
+                          trackHeight: 6.h,
+                          activeTrackColor: AppColors.primaryColor.withValues(
+                            alpha: 0.2,
+                          ),
+                          inactiveTrackColor: AppColors.primaryColor.withValues(
+                            alpha: 0.2,
+                          ),
+                          thumbColor: AppColors.primaryColor,
+                          thumbShape: SquareSliderThumbShape(
+                            thumbSize: 16,
+                            borderRadius: 4,
+                            thumbWidth: 24,
+                          ),
+                          overlayShape: RoundSliderOverlayShape(
+                            overlayRadius: 0,
+                          ),
+                        ),
+                        child: Slider(
+                          value: provider.dispatchRadius,
+                          min: 0,
+                          max: 500,
+                          onChanged: provider.isLoading
+                              ? null
+                              : (double newValue) {
+                                  provider.setDispatchRadius(newValue);
+                                },
+                          onChangeEnd: (double value) async {
+                            await provider.updateDispatchRadius(value);
+                            if (provider.errorMessage != null && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(provider.errorMessage!),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      if (provider.isLoading)
+                        Padding(
+                          padding: EdgeInsets.only(top: 8.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 16.w,
+                                height: 16.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'Updating...',
+                                style: AppStyle.book14.copyWith(
+                                  color: AppColors.greyText,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      AppSpacing.h10,
+                      Row(
+                        children: [
+                          Text(
+                            '${provider.dispatchRadius.toInt()} MI',
+                            style: AppStyle.semiBook14.copyWith(
+                              color: AppColors.greyText,
+                            ),
+                          ),
+                          Spacer(),
+                          Text(
+                            '500 MI',
+                            style: AppStyle.semiBook14.copyWith(
+                              color: AppColors.greyText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
               AppSpacing.h18,
               DecoratedBox(

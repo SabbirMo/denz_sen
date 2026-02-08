@@ -11,6 +11,7 @@ import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
 import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
+import 'package:denz_sen/feature/leaderboard/provider/leaderboard_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_provider.dart';
 import 'package:denz_sen/feature/my_message/provider/close_cases_provider.dart';
@@ -53,6 +54,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => EditInformationProvider()),
         ChangeNotifierProvider(create: (_) => DispatchRadiusProvider()),
         ChangeNotifierProvider(create: (_) => ReportSubmitProvider()),
+        ChangeNotifierProvider(create: (_) => LeaderboardProvider()),
       ],
       child: const MyApp(),
     ),
@@ -70,7 +72,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppStyle.lightTheme,
-        home: FullScreenWrapper(child: SplashScreen()),
+        home: SplashScreen(),
       ),
     );
   }

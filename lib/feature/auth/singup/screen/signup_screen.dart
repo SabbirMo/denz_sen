@@ -55,13 +55,16 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<SingupProvider>(context);
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Column(
         children: [
           HeaderSection(text: 'Sign Up to COP'),
           AppSpacing.h12,
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              padding: EdgeInsets.symmetric(horizontal: 16.w).copyWith(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -204,7 +207,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ],
                   ),
-                  AppSpacing.h26,
+                  AppSpacing.h36,
                 ],
               ),
             ),

@@ -5,6 +5,7 @@ import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/feature/auth/signin/screen/signin_screen.dart';
 import 'package:denz_sen/feature/auth/singup/screen/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 
@@ -21,6 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _controller = VideoPlayerController.asset('assets/video/splash_video.mp4')
       ..initialize().then((_) {
         setState(() {});
@@ -32,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _controller.pause();
     _controller.dispose();
     super.dispose();

@@ -22,6 +22,12 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
   bool _isLoading = false;
   Set<Marker> _markers = {};
 
+  // Search functionality
+  final TextEditingController _searchController = TextEditingController();
+  List<Location> _searchResults = [];
+  bool _isSearching = false;
+  bool _showSearchResults = false;
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +96,60 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
         _isLoading = false;
       });
     }
+  }
+
+  // Search for locations
+  Future<void> _searchLocation(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _showSearchResults = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+      _showSearchResults = true;
+    });
+
+    try {
+      List<Location> locations = await locationFromAddress(query);
+      setState(() {
+        _searchResults = locations;
+      });
+    } catch (e) {
+      debugPrint('Error searching location: $e');
+      setState(() {
+        _searchResults = [];
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No results found for "$query"'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSearching = false;
+      });
+    }
+  }
+
+  // Select location from search results
+  Future<void> _selectSearchResult(Location location) async {
+    final position = LatLng(location.latitude, location.longitude);
+
+    setState(() {
+      _selectedPosition = position;
+      _showSearchResults = false;
+      _searchController.clear();
+    });
+
+    _updateMarker(position);
+    await _getAddressFromLatLng(position);
+
+    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(position, 15));
   }
 
   void _updateMarker(LatLng position) {
@@ -161,6 +221,152 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
             zoomControlsEnabled: false,
             mapToolbarEnabled: false,
           ),
+
+          // Search bar
+          Positioned(
+            top: 16.h,
+            left: 16.w,
+            right: 16.w,
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search location...',
+                      hintStyle: AppStyle.book14.copyWith(
+                        color: AppColors.grey,
+                      ),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _showSearchResults = false;
+                                  _searchResults = [];
+                                });
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 14.h,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      if (value.length > 2) {
+                        _searchLocation(value);
+                      } else {
+                        setState(() {
+                          _showSearchResults = false;
+                        });
+                      }
+                    },
+                    onSubmitted: _searchLocation,
+                  ),
+                ),
+
+                // Search results
+                if (_showSearchResults)
+                  Container(
+                    margin: EdgeInsets.only(top: 8.h),
+                    constraints: BoxConstraints(maxHeight: 250.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: _isSearching
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : _searchResults.isEmpty
+                        ? Padding(
+                            padding: EdgeInsets.all(16.w),
+                            child: Text(
+                              'No results found',
+                              style: AppStyle.book14.copyWith(
+                                color: AppColors.grey,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: _searchResults.length,
+                            itemBuilder: (context, index) {
+                              final location = _searchResults[index];
+                              return ListTile(
+                                leading: Icon(
+                                  Icons.location_on,
+                                  color: AppColors.primaryColor,
+                                ),
+                                title: FutureBuilder<List<Placemark>>(
+                                  future: placemarkFromCoordinates(
+                                    location.latitude,
+                                    location.longitude,
+                                    // _searchController.dispose();
+                                  ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData &&
+                                        snapshot.data!.isNotEmpty) {
+                                      final place = snapshot.data!.first;
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            place.name ??
+                                                place.street ??
+                                                'Unknown',
+                                            style: AppStyle.semiBook14,
+                                          ),
+                                          Text(
+                                            '${place.locality}, ${place.administrativeArea}, ${place.country}',
+                                            style: AppStyle.book14.copyWith(
+                                              color: AppColors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                    return Text(
+                                      'Lat: ${location.latitude.toStringAsFixed(4)}, Lng: ${location.longitude.toStringAsFixed(4)}',
+                                      style: AppStyle.semiBook14,
+                                    );
+                                  },
+                                ),
+                                onTap: () => _selectSearchResult(location),
+                              );
+                            },
+                          ),
+                  ),
+              ],
+            ),
+          ),
+
           Positioned(
             bottom: 0,
             left: 0,

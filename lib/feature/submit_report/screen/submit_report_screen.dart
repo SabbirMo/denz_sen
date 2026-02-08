@@ -196,193 +196,198 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
       ),
       body: Consumer<ReportSubmitProvider>(
         builder: (context, provider, _) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomField(
-                    title: 'Date of Event *',
-                    hintText: 'YYYY-MM-DD',
-                    suffixIcon: Icon(Icons.calendar_month_outlined),
-                    controller: _dateController,
-                    readOnly: true,
-                    onTap: () => _selectDate(context),
-                  ),
-                  GestureDetector(
-                    onTap: _openLocationPicker,
-                    child: AbsorbPointer(
-                      child: CustomField(
-                        title: 'Address (Select from Map) *',
-                        hintText: 'Tap to select location from map',
-                        suffixIcon: Icon(
-                          Icons.location_on_outlined,
-                          color: provider.latitude != null
-                              ? Colors.green
-                              : AppColors.grey,
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomField(
+                      title: 'Date of Event *',
+                      hintText: 'YYYY-MM-DD',
+                      suffixIcon: Icon(Icons.calendar_month_outlined),
+                      controller: _dateController,
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
+                    ),
+                    GestureDetector(
+                      onTap: _openLocationPicker,
+                      child: AbsorbPointer(
+                        child: CustomField(
+                          title: 'Address (Select from Map) *',
+                          hintText: 'Tap to select location from map',
+                          suffixIcon: Icon(
+                            Icons.location_on_outlined,
+                            color: provider.latitude != null
+                                ? Colors.green
+                                : AppColors.grey,
+                          ),
+                          controller: _addressController,
                         ),
-                        controller: _addressController,
                       ),
                     ),
-                  ),
-                  if (provider.latitude != null && provider.longitude != null)
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 8.h,
+                    if (provider.latitude != null && provider.longitude != null)
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        margin: EdgeInsets.only(bottom: 16.h),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: Colors.green),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                'Location: ${provider.latitude?.toStringAsFixed(6)}, ${provider.longitude?.toStringAsFixed(6)}',
+                                style: AppStyle.book14.copyWith(
+                                  color: Colors.green.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      margin: EdgeInsets.only(bottom: 16.h),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(color: Colors.green),
-                      ),
-                      child: Row(
+                    CustomField(
+                      title: 'State (Optional)',
+                      hintText: 'Enter state',
+                      controller: _stateController,
+                    ),
+                    CustomField(
+                      title: 'City (Optional)',
+                      hintText: 'Enter city',
+                      controller: _cityController,
+                    ),
+                    CustomField(
+                      title: 'Zip Code (Optional)',
+                      hintText: 'Enter zip code',
+                      type: TextInputType.number,
+                      controller: _zipCodeController,
+                    ),
+                    CustomField(
+                      title: 'Detail of Event *',
+                      hintText: 'Enter details of the event',
+                      maxLines: 5,
+                      controller: _detailController,
+                    ),
+                    CustomField(
+                      title: 'Actions Taken *',
+                      hintText: 'Enter actions taken',
+                      maxLines: 5,
+                      controller: _actionsController,
+                    ),
+                    Text(
+                      'Attach Files (Optional)',
+                      style: AppStyle.book16.copyWith(color: AppColors.grey),
+                    ),
+                    AppSpacing.h8,
+                    SizedBox(
+                      height: 80.h,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
                         children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                            size: 20,
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: Text(
-                              'Location: ${provider.latitude?.toStringAsFixed(6)}, ${provider.longitude?.toStringAsFixed(6)}',
-                              style: AppStyle.book14.copyWith(
-                                color: Colors.green.shade700,
+                          ...selectedFiles.asMap().entries.map((entry) {
+                            int index = entry.key;
+                            File file = entry.value;
+                            return Container(
+                              width: 80.w,
+                              height: 80.h,
+                              margin: EdgeInsets.only(right: 8.w),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: 80.w,
+                                    height: 80.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                        color: AppColors.primaryColor,
+                                      ),
+                                      image: DecorationImage(
+                                        image: FileImage(file),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 2,
+                                    right: 2,
+                                    child: GestureDetector(
+                                      onTap: () => _removeImage(index),
+                                      child: Container(
+                                        padding: EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.black.withValues(
+                                            alpha: 0.6,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.close,
+                                          size: 16,
+                                          color: AppColors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          GestureDetector(
+                            onTap: _pickImage,
+                            child: Container(
+                              width: 80.w,
+                              height: 80.h,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryColor.withValues(
+                                  alpha: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(8.r),
+                                border: Border.all(
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cloud_upload_outlined,
+                                    color: AppColors.primaryColor,
+                                  ),
+                                  AppSpacing.h2,
+                                  Text(
+                                    'Upload',
+                                    style: AppStyle.medium14.copyWith(
+                                      color: AppColors.primaryColor,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  CustomField(
-                    title: 'State (Optional)',
-                    hintText: 'Enter state',
-                    controller: _stateController,
-                  ),
-                  CustomField(
-                    title: 'City (Optional)',
-                    hintText: 'Enter city',
-                    controller: _cityController,
-                  ),
-                  CustomField(
-                    title: 'Zip Code (Optional)',
-                    hintText: 'Enter zip code',
-                    type: TextInputType.number,
-                    controller: _zipCodeController,
-                  ),
-                  CustomField(
-                    title: 'Detail of Event *',
-                    hintText: 'Enter details of the event',
-                    maxLines: 5,
-                    controller: _detailController,
-                  ),
-                  CustomField(
-                    title: 'Actions Taken *',
-                    hintText: 'Enter actions taken',
-                    maxLines: 5,
-                    controller: _actionsController,
-                  ),
-                  Text(
-                    'Attach Files (Optional)',
-                    style: AppStyle.book16.copyWith(color: AppColors.grey),
-                  ),
-                  AppSpacing.h8,
-                  SizedBox(
-                    height: 80.h,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        ...selectedFiles.asMap().entries.map((entry) {
-                          int index = entry.key;
-                          File file = entry.value;
-                          return Container(
-                            width: 80.w,
-                            height: 80.h,
-                            margin: EdgeInsets.only(right: 8.w),
-                            child: Stack(
-                              children: [
-                                Container(
-                                  width: 80.w,
-                                  height: 80.h,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    border: Border.all(
-                                      color: AppColors.primaryColor,
-                                    ),
-                                    image: DecorationImage(
-                                      image: FileImage(file),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 2,
-                                  right: 2,
-                                  child: GestureDetector(
-                                    onTap: () => _removeImage(index),
-                                    child: Container(
-                                      padding: EdgeInsets.all(2),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.black.withValues(
-                                          alpha: 0.6,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.close,
-                                        size: 16,
-                                        color: AppColors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            width: 80.w,
-                            height: 80.h,
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryColor.withValues(
-                                alpha: 0.2,
-                              ),
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(color: AppColors.primaryColor),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.cloud_upload_outlined,
-                                  color: AppColors.primaryColor,
-                                ),
-                                AppSpacing.h2,
-                                Text(
-                                  'Upload',
-                                  style: AppStyle.medium14.copyWith(
-                                    color: AppColors.primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                    AppSpacing.h24,
+                    CustomButton(
+                      isLoading: provider.isLoading,
+                      buttonText: 'Submit',
+                      onPressed: provider.isLoading ? null : _submitReport,
                     ),
-                  ),
-                  AppSpacing.h24,
-                  CustomButton(
-                    buttonText: provider.isLoading ? 'Submitting...' : 'Submit',
-                    onPressed: provider.isLoading ? null : _submitReport,
-                  ),
-                  AppSpacing.h24,
-                ],
+                    AppSpacing.h24,
+                  ],
+                ),
               ),
             ),
           );

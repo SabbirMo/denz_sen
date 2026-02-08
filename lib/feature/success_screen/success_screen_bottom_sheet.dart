@@ -78,21 +78,22 @@ class SuccessScreenBottomSheet {
                 ] else
                   ...[],
                 AppSpacing.h20,
-                CustomButton(
-                  buttonText: isReportSubmitted ? "Okay" : "Return to Login",
-                  onPressed: () {
-                    if (isReportSubmitted) {
-                      Navigator.of(context).pop();
-                    } else {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const SignInScreen(),
-                        ),
-                      );
-                    }
-                  },
+                SafeArea(
+                  child: CustomButton(
+                    buttonText: isReportSubmitted ? "Okay" : "Return to Login",
+                    onPressed: () {
+                      if (isReportSubmitted) {
+                        Navigator.of(context).pop();
+                      } else {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const SignInScreen(),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ),
-                AppSpacing.h26,
               ],
             ),
           ),

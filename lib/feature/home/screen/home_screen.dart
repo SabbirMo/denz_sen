@@ -7,6 +7,7 @@ import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_home_tab_bar.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
+import 'package:denz_sen/feature/leaderboard/screen/leaderboard_screen.dart';
 import 'package:denz_sen/feature/my_cases/screen/my_cases_screen.dart';
 import 'package:denz_sen/feature/my_message/screen/my_message_screen.dart';
 import 'package:denz_sen/feature/setting_page/screen/setting_page.dart';
@@ -58,7 +59,12 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Consumer<ProfileShowProvider>(
           builder: (context, ref, _) => CustomHomeAppBar(
             userName: ref.profile?.fullName ?? 'User',
-            onLeaderboardTap: () {},
+            onLeaderboardTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LeaderboardScreen()),
+              );
+            },
             onSettingsTap: () {
               Navigator.push(
                 context,

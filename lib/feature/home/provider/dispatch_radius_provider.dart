@@ -9,7 +9,15 @@ class DispatchRadiusProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   String? successMessage;
-  double? currentDispatchRadius;
+  double _dispatchRadius = 0.0;
+
+  double get dispatchRadius => _dispatchRadius;
+
+  /// Set dispatch radius value locally (for slider movement)
+  void setDispatchRadius(double value) {
+    _dispatchRadius = value;
+    notifyListeners();
+  }
 
   /// Update dispatch radius using PATCH method
   Future<bool> updateDispatchRadius(double dispatchRadius) async {
@@ -49,7 +57,7 @@ class DispatchRadiusProvider extends ChangeNotifier {
       debugPrint('Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        currentDispatchRadius = dispatchRadius;
+        _dispatchRadius = dispatchRadius;
         successMessage = 'Dispatch radius updated successfully';
         isLoading = false;
         notifyListeners();
