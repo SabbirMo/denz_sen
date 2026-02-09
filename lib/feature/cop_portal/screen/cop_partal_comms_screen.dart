@@ -63,66 +63,68 @@ class _CopPartalCommsScreenState extends State<CopPartalCommsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: Column(
-        children: [
-          Expanded(
-            child: Consumer<CopPortalCommsProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading && provider.messages.isEmpty) {
-                  return ListView.builder(
-                    padding: EdgeInsets.all(16.w),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 5,
-                    itemBuilder: (context, index) => const MessageShimmer(),
-                  );
-                }
-
-                if (provider.messages.isEmpty) {
-                  return const Center(child: Text("No messages yet"));
-                }
-
-                // Auto-scroll when new messages arrive
-                if (provider.messages.length != _previousMessageCount) {
-                  _previousMessageCount = provider.messages.length;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (_scrollController.hasClients) {
-                      _scrollController.animateTo(
-                        0,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    }
-                  });
-                }
-
-                return ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: EdgeInsets.all(16.w),
-                  itemCount: provider.messages.length,
-                  itemBuilder: (context, index) {
-                    final message = provider.messages[index];
-                    return MessageWidget(
-                      name: message.senderName,
-                      message: message.content,
-                      time: formatTime(message.createdAt),
-                      avatar: message.senderAvatar.isNotEmpty
-                          ? message.senderAvatar
-                          : 'https://ui-avatars.com/api/?name=${message.senderName}',
-                      color: message.isMe
-                          ? AppColors.primaryColor
-                          : AppColors.black,
-                      rank: 'assets/icons/rank1.png',
-                      attachmentUrls: message.attachmentUrls,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Consumer<CopPortalCommsProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading && provider.messages.isEmpty) {
+                    return ListView.builder(
+                      padding: EdgeInsets.all(16.w),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 5,
+                      itemBuilder: (context, index) => const MessageShimmer(),
                     );
-                  },
-                );
-              },
+                  }
+
+                  if (provider.messages.isEmpty) {
+                    return const Center(child: Text("No messages yet"));
+                  }
+
+                  // Auto-scroll when new messages arrive
+                  if (provider.messages.length != _previousMessageCount) {
+                    _previousMessageCount = provider.messages.length;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (_scrollController.hasClients) {
+                        _scrollController.animateTo(
+                          0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      }
+                    });
+                  }
+
+                  return ListView.builder(
+                    controller: _scrollController,
+                    reverse: true,
+                    padding: EdgeInsets.all(16.w),
+                    itemCount: provider.messages.length,
+                    itemBuilder: (context, index) {
+                      final message = provider.messages[index];
+                      return MessageWidget(
+                        name: message.senderName,
+                        message: message.content,
+                        time: formatTime(message.createdAt),
+                        avatar: message.senderAvatar.isNotEmpty
+                            ? message.senderAvatar
+                            : 'https://ui-avatars.com/api/?name=${message.senderName}',
+                        color: message.isMe
+                            ? AppColors.primaryColor
+                            : AppColors.black,
+                        rank: 'assets/icons/rank1.png',
+                        attachmentUrls: message.attachmentUrls,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-          _buildInputArea(context),
-        ],
+            _buildInputArea(context),
+          ],
+        ),
       ),
     );
   }

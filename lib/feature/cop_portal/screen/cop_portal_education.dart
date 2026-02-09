@@ -28,77 +28,81 @@ class _CopPortalEducationState extends State<CopPortalEducation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Videos', style: AppStyle.semiBook16),
-              AppSpacing.h6,
-              const VideoListViewBuilder(),
-              Text('Guides', style: AppStyle.semiBook16),
-              const GuidesListViewBuilder(),
-              AppSpacing.h16,
-              Container(
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Need help with something?',
-                            style: AppStyle.medium14.copyWith(
-                              color: AppColors.white,
-                            ),
-                          ),
-                          AppSpacing.h2,
-                          Text(
-                            'Contact us if you need help with your investigation.',
-                            style: AppStyle.book14.copyWith(
-                              fontSize: 12.sp,
-                              color: AppColors.white,
-                            ),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.r),
-                              ),
-                              shadowColor: Colors.transparent,
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ContactUsScreen(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              "Contact Us",
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Videos', style: AppStyle.semiBook16),
+                AppSpacing.h6,
+                const VideoListViewBuilder(),
+                Text('Guides', style: AppStyle.semiBook16),
+                const GuidesListViewBuilder(),
+                AppSpacing.h16,
+                Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Need help with something?',
                               style: AppStyle.medium14.copyWith(
-                                color: AppColors.primaryColor,
+                                color: AppColors.white,
                               ),
                             ),
-                          ),
-                        ],
+                            AppSpacing.h2,
+                            Text(
+                              'Contact us if you need help with your investigation.',
+                              style: AppStyle.book14.copyWith(
+                                fontSize: 12.sp,
+                                color: AppColors.white,
+                              ),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                shadowColor: Colors.transparent,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ContactUsScreen(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Contact Us",
+                                style: AppStyle.medium14.copyWith(
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Image.asset('assets/icons/ques.png'),
-                  ],
+                      SizedBox(width: 8.w),
+                      Image.asset('assets/icons/ques.png'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                AppSpacing.h18,
+              ],
+            ),
           ),
         ),
       ),

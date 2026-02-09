@@ -66,61 +66,6 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
     super.dispose();
   }
 
-  // void _addMember() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext dialogContext) {
-  //       return Dialog(
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(12.r),
-  //         ),
-  //         backgroundColor: Colors.white,
-  //         child: Padding(
-  //           padding: EdgeInsets.all(16.w),
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               Text(
-  //                 'Add member to the Case',
-  //                 style: AppStyle.medium14.copyWith(color: AppColors.black),
-  //               ),
-
-  //               AppSpacing.h8,
-
-  //               Container(
-  //                 decoration: BoxDecoration(
-  //                   color: Color(0xfff9f9f7),
-  //                   borderRadius: BorderRadius.circular(8.r),
-  //                   border: Border.all(color: AppColors.border),
-  //                 ),
-  //                 child: TextField(
-  //                   controller: _searchController,
-  //                   autofocus: false,
-  //                   decoration: InputDecoration(
-  //                     hintText: 'Search by name',
-  //                     border: InputBorder.none,
-  //                     suffixIcon: Icon(Icons.search),
-  //                     contentPadding: EdgeInsets.symmetric(
-  //                       horizontal: 10.w,
-  //                       vertical: 12.h,
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //               SizedBox(height: 22.h),
-  //               ElevatedButton(
-  //                 onPressed: () => Navigator.pop(dialogContext),
-  //                 child: const Text('OK'),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void _closeCase() {
     // Show confirmation dialog before closing case
     showDialog(
@@ -278,45 +223,47 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Consumer<MessageDetailsProvider>(
-              builder: (context, restProvider, child) {
-                // Always show REST API messages for consistency
-                if (restProvider.isLoading) {
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Consumer<MessageDetailsProvider>(
+                builder: (context, restProvider, child) {
+                  // Always show REST API messages for consistency
+                  if (restProvider.isLoading) {
+                    return ListView.builder(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 5,
+                      itemBuilder: (context, index) => const MessageShimmer(),
+                    );
+                  }
+
+                  final messages = restProvider.messages;
+
+                  if (messages.isEmpty) {
+                    return const Center(child: Text('No messages found'));
+                  }
+
                   return ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 5,
-                    itemBuilder: (context, index) => const MessageShimmer(),
+                    padding: EdgeInsets.all(16.w),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      return MessageWidget(message: message);
+                    },
                   );
-                }
-
-                final messages = restProvider.messages;
-
-                if (messages.isEmpty) {
-                  return const Center(child: Text('No messages found'));
-                }
-
-                return ListView.builder(
-                  padding: EdgeInsets.all(16.w),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    return MessageWidget(message: message);
-                  },
-                );
-              },
+                },
+              ),
             ),
-          ),
-          // Show message input only if case is not closed
-          if (widget.caseStatus?.toLowerCase() != 'closed')
-            _buildMessageInput()
-          else
-            _buildClosedCaseMessage(),
-        ],
+            // Show message input only if case is not closed
+            if (widget.caseStatus?.toLowerCase() != 'closed')
+              _buildMessageInput()
+            else
+              _buildClosedCaseMessage(),
+          ],
+        ),
       ),
     );
   }

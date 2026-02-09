@@ -12,12 +12,6 @@ class HeaderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Image.asset(
-          'assets/images/mainPic.png',
-          fit: BoxFit.cover,
-          height: 260.h,
-          width: double.infinity,
-        ),
         Container(
           width: double.infinity,
           height: 260.h,
@@ -33,8 +27,6 @@ class HeaderSection extends StatelessWidget {
           height: 260.h, // image area
           child: Center(
             child: Container(
-              width: 60.w,
-              height: 60.h,
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: AppColors.white,

@@ -21,67 +21,69 @@ class ForgotPasswordBottomSheet {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-            ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        width: 60.w,
-                        height: 6.h,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: AppColors.grey.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(3.r),
+          child: SafeArea(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          width: 60.w,
+                          height: 6.h,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: AppColors.grey.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(3.r),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    BottomSheetIconText(title: 'Forgot Password?'),
-                    AppSpacing.h16,
-                    Text(
-                      'Forgotten your password? No worries, just enter your email to receive password reset instructions',
-                      style: AppStyle.book14,
-                    ),
-                    AppSpacing.h12,
-                    CustomField(
-                      title: 'Email Address',
-                      hintText: 'Enter your email',
-                      controller: emailController,
-                    ),
-                    AppSpacing.h12,
-                    Consumer<ForgotPasswordProvider>(
-                      builder: (context, provider, _) {
-                        return CustomButton(
-                          isLoading: provider.isLoading,
-                          onPressed: () async {
-                            final email = emailController.text.trim();
-                            final success = await provider
-                                .sendForgotPasswordEmail(email);
-                            if (success) {
-                              Navigator.pop(
-                                context,
-                              ); // Close current bottom sheet first
-                              VerificationPage.show(
-                                context,
-                                otpSource: OtpSource.passwordReset,
-                              );
-                            }
-                          },
-                          buttonText: 'Send Email',
-                        );
-                      },
-                    ),
-                    AppSpacing.h26,
-                  ],
+                      BottomSheetIconText(title: 'Forgot Password?'),
+                      AppSpacing.h16,
+                      Text(
+                        'Forgotten your password? No worries, just enter your email to receive password reset instructions',
+                        style: AppStyle.book14,
+                      ),
+                      AppSpacing.h12,
+                      CustomField(
+                        title: 'Email Address',
+                        hintText: 'Enter your email',
+                        controller: emailController,
+                      ),
+                      AppSpacing.h12,
+                      Consumer<ForgotPasswordProvider>(
+                        builder: (context, provider, _) {
+                          return CustomButton(
+                            isLoading: provider.isLoading,
+                            onPressed: () async {
+                              final email = emailController.text.trim();
+
+                              final success = await provider
+                                  .sendForgotPasswordEmail(email);
+                              if (success) {
+                                Navigator.pop(
+                                  context,
+                                ); // Close current bottom sheet first
+                                VerificationPage.show(
+                                  context,
+                                  otpSource: OtpSource.passwordReset,
+                                );
+                              }
+                            },
+                            buttonText: 'Send Email',
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
