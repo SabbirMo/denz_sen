@@ -48,6 +48,9 @@ class FirebaseNotificationService {
         print('Body: ${message.notification?.body}');
         print('Data: ${message.data}');
 
+        // Save dispatch_id from notification data
+        _saveDispatchId(message.data);
+
         // Show custom dialog
         final context = navigatorKey.currentContext;
         if (context != null) {
@@ -61,6 +64,9 @@ class FirebaseNotificationService {
         print('Title: ${message.notification?.title}');
         print('Body: ${message.notification?.body}');
         print('Data: ${message.data}');
+
+        // Save dispatch_id from notification data
+        _saveDispatchId(message.data);
 
         // Show custom dialog
         final context = navigatorKey.currentContext;
@@ -184,6 +190,9 @@ class FirebaseNotificationService {
         print('Body: ${initialMessage.notification?.body}');
         print('Data: ${initialMessage.data}');
 
+        // Save dispatch_id from notification data
+        _saveDispatchId(initialMessage.data);
+
         // Show dialog after a short delay to ensure UI is ready
         Future.delayed(const Duration(milliseconds: 1000), () {
           final context = navigatorKey.currentContext;
@@ -221,6 +230,33 @@ class FirebaseNotificationService {
     await _firebaseMessaging.unsubscribeFromTopic(topic);
     print('❌ Unsubscribed from topic: $topic');
   }
+
+  /// Save dispatch_id from notification data to SharedPreferences
+  static Future<void> _saveDispatchId(Map<String, dynamic> data) async {
+    try {
+      if (data.containsKey('dispatch_id')) {
+        final dispatchId = data['dispatch_id'];
+        if (dispatchId != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('dispatch_id', dispatchId.toString());
+          print('✅ Dispatch ID saved: $dispatchId');
+        }
+      }
+    } catch (e) {
+      print('❌ Error saving dispatch_id: $e');
+    }
+  }
+
+  /// Get saved dispatch_id from SharedPreferences
+  static Future<String?> getSavedDispatchId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('dispatch_id');
+    } catch (e) {
+      print('❌ Error getting dispatch_id: $e');
+      return null;
+    }
+  }
 }
 
 /// Background message handler (must be top-level function)
@@ -230,4 +266,18 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Title: ${message.notification?.title}');
   print('Body: ${message.notification?.body}');
   print('Data: ${message.data}');
+
+  // Save dispatch_id from notification data
+  try {
+    if (message.data.containsKey('dispatch_id')) {
+      final dispatchId = message.data['dispatch_id'];
+      if (dispatchId != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('dispatch_id', dispatchId.toString());
+        print('✅ Dispatch ID saved in background: $dispatchId');
+      }
+    }
+  } catch (e) {
+    print('❌ Error saving dispatch_id in background: $e');
+  }
 }

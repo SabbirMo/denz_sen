@@ -3,8 +3,10 @@ import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
+import 'package:denz_sen/firebase/provider/new_dispathc_details_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 /// Handles notification UI display
 class NotificationHandler {
@@ -49,9 +51,63 @@ class NotificationHandler {
                     AppSpacing.h12,
                     CustomButton(
                       buttonText: 'See Details',
-                      onPressed: () {
+                      onPressed: () async {
+                        // Save the navigator context before popping
+                        final navigatorContext = Navigator.of(context).context;
+
+                        // Get the provider before closing dialog
+                        final provider =
+                            Provider.of<NewDispathcDetailsProvider>(
+                              context,
+                              listen: false,
+                            );
+
+                        // Close the alert dialog first
                         Navigator.of(context).pop();
-                        DispatchAlertBottomSheet.show(context);
+
+                        // Check if widget is still mounted
+                        if (!navigatorContext.mounted) return;
+
+                        // Show loading dialog
+                        showDialog(
+                          context: navigatorContext,
+                          barrierDismissible: false,
+                          builder: (dialogContext) =>
+                              const Center(child: CircularProgressIndicator()),
+                        );
+
+                        // Fetch dispatch details
+                        final success = await provider.fetchDispatchDetails();
+
+                        // Check if still mounted and close loading dialog
+                        if (navigatorContext.mounted) {
+                          Navigator.of(
+                            navigatorContext,
+                            rootNavigator: true,
+                          ).pop();
+                        }
+
+                        // Small delay to ensure dialog is closed
+                        await Future.delayed(const Duration(milliseconds: 100));
+
+                        // Check if still mounted before showing bottom sheet
+                        if (!navigatorContext.mounted) return;
+
+                        // Show bottom sheet with data or error
+                        if (success) {
+                          DispatchAlertBottomSheet.show(navigatorContext);
+                        } else {
+                          // Show error message
+                          ScaffoldMessenger.of(navigatorContext).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                provider.errorMessage ??
+                                    'Failed to load dispatch details',
+                              ),
+                              backgroundColor: AppColors.red,
+                            ),
+                          );
+                        }
                       },
                       width: double.infinity,
                       backgroundColor: AppColors.white,

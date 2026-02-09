@@ -10,6 +10,8 @@ import 'package:denz_sen/feature/cop_portal/provider/cop_portal_message_send.dar
 import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
 import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
+import 'package:denz_sen/firebase/provider/new_dispatch_details_accept_provider.dart';
+import 'package:denz_sen/firebase/provider/new_dispathc_details_provider.dart';
 import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/leaderboard/provider/leaderboard_provider.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
@@ -80,6 +82,10 @@ void main() async {
         ChangeNotifierProvider(create: (_) => DispatchRadiusProvider()),
         ChangeNotifierProvider(create: (_) => ReportSubmitProvider()),
         ChangeNotifierProvider(create: (_) => LeaderboardProvider()),
+        ChangeNotifierProvider(create: (_) => NewDispathcDetailsProvider()),
+        ChangeNotifierProvider(
+          create: (_) => NewDispatchDetailsAcceptProvider(),
+        ),
       ],
       child: const MyApp(),
     ),
