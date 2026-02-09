@@ -1,38 +1,6 @@
-import 'package:denz_sen/core/theme/app_style.dart';
-import 'package:denz_sen/feature/auth/forgot_password/provider/forgot_password_provider.dart';
-import 'package:denz_sen/feature/auth/new_password/provider/new_password_provider.dart';
-import 'package:denz_sen/feature/auth/signin/provider/signin_provider.dart';
-import 'package:denz_sen/feature/auth/singup/provider/singup_provider.dart';
-import 'package:denz_sen/feature/change_password/provider/change_password_provider.dart';
-import 'package:denz_sen/feature/contact_us/provider/contact_us_provider.dart';
-import 'package:denz_sen/feature/cop_portal/provider/cop_portal_comms_provider.dart';
-import 'package:denz_sen/feature/cop_portal/provider/cop_portal_message_send.dart';
-import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
-import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
-import 'package:denz_sen/feature/home/provider/dipatches_nearby_provider.dart';
-import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
-import 'package:denz_sen/firebase/provider/new_dispatch_details_accept_provider.dart';
-import 'package:denz_sen/firebase/provider/new_dispathc_details_provider.dart';
-import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
-import 'package:denz_sen/feature/leaderboard/provider/leaderboard_provider.dart';
-import 'package:denz_sen/feature/my_cases/provider/my_cases_pending_dispatch_provider.dart';
-import 'package:denz_sen/feature/my_cases/provider/my_cases_provider.dart';
-import 'package:denz_sen/feature/my_message/provider/close_cases_provider.dart';
-import 'package:denz_sen/feature/my_message/provider/message_details_provider.dart';
-import 'package:denz_sen/feature/my_message/provider/message_send_provider.dart';
-import 'package:denz_sen/feature/my_message/provider/message_socket_provider.dart';
-import 'package:denz_sen/feature/my_message/provider/my_message_provider.dart';
-import 'package:denz_sen/feature/setting_page/provider/edit_information_provider.dart';
-import 'package:denz_sen/feature/splash/splash_screen.dart';
-import 'package:denz_sen/feature/submit_report/provider/report_submit_provider.dart';
-import 'package:denz_sen/feature/verification/provider/verification_provider.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:denz_sen/core/export/main_export.dart';
 import 'firebase_options.dart';
+import 'package:flutter/material.dart';
 
 /// Background notification handler (must be top-level function)
 @pragma('vm:entry-point')

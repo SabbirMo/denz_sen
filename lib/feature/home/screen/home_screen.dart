@@ -91,86 +91,85 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
           child: Column(
             children: [
+              // Fixed Map at top
+              Stack(
+                children: [
+                  SizedBox(
+                    width: 340.w,
+                    height: 200.h,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: AppColors.black.withValues(alpha: .4),
+                          width: 1.w,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(1.w),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.r),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(23.780682, 90.407428),
+                              zoom: 16,
+                            ),
+                            zoomControlsEnabled: false,
+                            zoomGesturesEnabled: false,
+                            myLocationButtonEnabled: false,
+                            mapToolbarEnabled: false,
+                            liteModeEnabled: false,
+                            markers: markers,
+                            onMapCreated: (GoogleMapController controller) {
+                              mapController = controller;
+                            },
+                            onTap: (LatLng position) {
+                              setState(() {
+                                markers = {
+                                  Marker(
+                                    markerId: MarkerId('selected-location'),
+                                    position: position,
+                                    infoWindow: InfoWindow(
+                                      title: position.toString(),
+                                    ),
+                                  ),
+                                };
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  Positioned(
+                    bottom: 12.h,
+                    left: 12.w,
+                    child: GestureDetector(
+                      onTap: _onTapGetMyLocation,
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Icon(
+                          Icons.my_location,
+                          size: 24.w,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              AppSpacing.h20,
+              // Scrollable content below map
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Stack(
-                        children: [
-                          SizedBox(
-                            width: 340.w,
-                            height: 200.h,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16.r),
-                                border: Border.all(
-                                  color: AppColors.black.withValues(alpha: .4),
-                                  width: 1.w,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(1.w),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  child: GoogleMap(
-                                    initialCameraPosition: CameraPosition(
-                                      target: LatLng(23.780682, 90.407428),
-                                      zoom: 16,
-                                    ),
-                                    zoomControlsEnabled: false,
-                                    zoomGesturesEnabled: false,
-                                    myLocationButtonEnabled: false,
-                                    mapToolbarEnabled: false,
-                                    liteModeEnabled: false,
-                                    markers: markers,
-                                    onMapCreated:
-                                        (GoogleMapController controller) {
-                                          mapController = controller;
-                                        },
-                                    onTap: (LatLng position) {
-                                      setState(() {
-                                        markers = {
-                                          Marker(
-                                            markerId: MarkerId(
-                                              'selected-location',
-                                            ),
-                                            position: position,
-                                            infoWindow: InfoWindow(
-                                              title: position.toString(),
-                                            ),
-                                          ),
-                                        };
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          Positioned(
-                            bottom: 12.h,
-                            left: 12.w,
-                            child: GestureDetector(
-                              onTap: _onTapGetMyLocation,
-                              child: Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: Icon(
-                                  Icons.my_location,
-                                  size: 24.w,
-                                  color: AppColors.primaryColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.h20,
                       GridView(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -305,6 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               AppSpacing.h12,
+              // Fixed slider at bottom
               Consumer<DispatchRadiusProvider>(
                 builder: (context, dispatchProvider, _) {
                   return Container(
