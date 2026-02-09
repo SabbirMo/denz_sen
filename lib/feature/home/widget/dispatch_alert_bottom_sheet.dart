@@ -7,9 +7,58 @@ import 'package:denz_sen/firebase/provider/new_dispathc_details_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DispatchAlertBottomSheet {
-  static void show(BuildContext context) {
+  static void show(BuildContext context, {dynamic id}) async {
+    // Save dispatch_id to SharedPreferences if provided
+    if (id != null) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('dispatch_id', id.toString());
+        debugPrint('✅ Dispatch ID saved: $id');
+      } catch (e) {
+        debugPrint('❌ Error saving dispatch_id: $e');
+      }
+    }
+
+    // Fetch dispatch details
+    final provider = Provider.of<NewDispathcDetailsProvider>(
+      context,
+      listen: false,
+    );
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    // Fetch details
+    final success = await provider.fetchDispatchDetails();
+
+    // Close loading dialog
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+
+    if (!success) {
+      // Show error if failed
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              provider.errorMessage ?? 'Failed to load dispatch details',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Show bottom sheet with data
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

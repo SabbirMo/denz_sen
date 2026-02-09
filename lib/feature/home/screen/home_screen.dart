@@ -2,11 +2,13 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/cop_portal/screen/cop_portal_screen.dart';
+import 'package:denz_sen/feature/home/provider/dipatches_nearby_provider.dart';
 import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/feature/home/provider/profile_show_provider.dart';
 import 'package:denz_sen/feature/home/widget/custom_home_tab_bar.dart';
 import 'package:denz_sen/feature/home/widget/custom_slider.dart';
+import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
 import 'package:denz_sen/feature/leaderboard/screen/leaderboard_screen.dart';
 import 'package:denz_sen/feature/my_cases/screen/my_cases_screen.dart';
 import 'package:denz_sen/feature/my_message/screen/my_message_screen.dart';
@@ -39,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _onTapGetMyLocation();
       _loadProfile();
+      _loadDispatchesNearby();
     });
   }
 
@@ -46,6 +49,15 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     final provider = Provider.of<ProfileShowProvider>(context, listen: false);
     await provider.showProfile();
+  }
+
+  Future<void> _loadDispatchesNearby() async {
+    if (!mounted) return;
+    final provider = Provider.of<DipatchesNearbyProvider>(
+      context,
+      listen: false,
+    );
+    await provider.fetchDispatchesNearby();
   }
 
   @override
@@ -101,11 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 padding: EdgeInsets.all(1.w),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(16.r),
-
-                                  //  Image.asset(
-                                  //   'assets/images/maps.png',
-                                  //   fit: BoxFit.cover,
-                                  // ),
                                   child: GoogleMap(
                                     initialCameraPosition: CameraPosition(
                                       target: LatLng(23.780682, 90.407428),
@@ -227,28 +234,71 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       AppSpacing.h20,
-                      Text('Active Dispatches', style: AppStyle.semiBook16),
+                      Text('New Dispatches', style: AppStyle.semiBook16),
                       AppSpacing.h8,
-                      Container(
-                        padding: EdgeInsets.all(16.w),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: AppColors.offWhite,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Column(
-                          children: [
-                            Image.asset('assets/icons/fileFace.png'),
-                            AppSpacing.h8,
-                            Text(
-                              'No Dispatches Yet',
-                              style: AppStyle.medium14.copyWith(
-                                fontSize: 12.sp,
-                                color: AppColors.greyText,
+                      Consumer<DipatchesNearbyProvider>(
+                        builder: (context, ref, _) {
+                          if (ref.isLoading) {
+                            return Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.h),
+                                child: CircularProgressIndicator(),
                               ),
-                            ),
-                          ],
-                        ),
+                            );
+                          }
+
+                          if (ref.dispatchesNearby.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.h),
+                                child: Text(
+                                  'No dispatches nearby',
+                                  style: AppStyle.medium14,
+                                ),
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: ref.dispatchesNearby.length,
+                            itemBuilder: (context, index) {
+                              final dispatch = ref.dispatchesNearby[index];
+                              final id = dispatch.id ?? 'N/A';
+                              return Card(
+                                margin: EdgeInsets.only(bottom: 12.h),
+                                color: AppColors.offWhite,
+                                child: ListTile(
+                                  onTap: () {
+                                    DispatchAlertBottomSheet.show(
+                                      context,
+                                      id: id,
+                                    );
+                                  },
+                                  title: Text(
+                                    dispatch.caseNumber ?? 'N/A',
+                                    style: AppStyle.medium14.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    dispatch.address ?? 'No address',
+                                    style: AppStyle.book14,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                  trailing: Text(
+                                    dispatch.timeAgo ?? '',
+                                    style: AppStyle.book14,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       ),
                     ],
                   ),

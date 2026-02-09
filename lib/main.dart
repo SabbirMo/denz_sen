@@ -9,6 +9,7 @@ import 'package:denz_sen/feature/cop_portal/provider/cop_portal_comms_provider.d
 import 'package:denz_sen/feature/cop_portal/provider/cop_portal_message_send.dart';
 import 'package:denz_sen/feature/cop_portal/provider/education_provider.dart';
 import 'package:denz_sen/feature/home/provider/dispatch_radius_provider.dart';
+import 'package:denz_sen/feature/home/provider/dipatches_nearby_provider.dart';
 import 'package:denz_sen/feature/home/provider/google_maps_provider.dart';
 import 'package:denz_sen/firebase/provider/new_dispatch_details_accept_provider.dart';
 import 'package:denz_sen/firebase/provider/new_dispathc_details_provider.dart';
@@ -86,6 +87,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => NewDispatchDetailsAcceptProvider(),
         ),
+        ChangeNotifierProvider(create: (_) => DipatchesNearbyProvider()),
       ],
       child: const MyApp(),
     ),
