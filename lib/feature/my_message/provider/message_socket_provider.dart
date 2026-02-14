@@ -60,20 +60,29 @@ class MessageSocketProvider extends ChangeNotifier {
   void _handleIncomingMessage(dynamic data) {
     try {
       final jsonData = jsonDecode(data);
-      debugPrint('📩 Received message: $jsonData');
+      debugPrint('📩 Received WebSocket message: $jsonData');
 
-      if (jsonData['type'] == 'new_message') {
+      // Handle different message types from backend
+      if (jsonData['type'] == 'new_message' ||
+          jsonData['event'] == 'new_message' ||
+          jsonData['action'] == 'new_message') {
         // Trigger refresh callback instead of managing messages
-        debugPrint('✅ New message received, triggering refresh');
+        debugPrint('✅ New message received, triggering UI refresh');
         hasNewMessage = true;
         if (onNewMessage != null) {
           onNewMessage!();
         }
         notifyListeners();
+      } else {
+        // Log unhandled message types for debugging
+        debugPrint(
+          'ℹ️ Unhandled WebSocket message type: ${jsonData['type'] ?? jsonData['event'] ?? jsonData['action']}',
+        );
       }
     } catch (e, stackTrace) {
-      debugPrint('❌ Error parsing message: $e');
-      debugPrint('❌ Stack trace: $stackTrace');
+      debugPrint('❌ Error parsing WebSocket message: $e');
+      debugPrint('Raw data: $data');
+      debugPrint('Stack trace: $stackTrace');
     }
   }
 

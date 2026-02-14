@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:denz_sen/feature/my_message/provider/close_cases_provider.dart';
@@ -27,6 +28,9 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
   final List<File> _selectedFiles = [];
   final ImagePicker _picker = ImagePicker();
 
+  Timer? _debounceTimer;
+  bool justSentMessage = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,10 +44,16 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
         // Set callback to refresh when new message arrives via WebSocket
         socketProvider.onNewMessage = () {
           if (mounted) {
-            Provider.of<MessageDetailsProvider>(
-              context,
-              listen: false,
-            ).fetchMessageDetails(widget.caseId);
+            // Debounce: wait a bit before fetching to avoid rapid reloads
+            _debounceTimer?.cancel();
+            _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+              if (mounted) {
+                Provider.of<MessageDetailsProvider>(
+                  context,
+                  listen: false,
+                ).fetchMessageDetails(widget.caseId);
+              }
+            });
           }
         };
 
@@ -61,6 +71,14 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
 
   @override
   void dispose() {
+    // Disconnect WebSocket when leaving page
+    final socketProvider = Provider.of<MessageSocketProvider>(
+      context,
+      listen: false,
+    );
+    socketProvider.disconnect();
+
+    _debounceTimer?.cancel();
     _messageController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -226,11 +244,25 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
       body: SafeArea(
         child: Column(
           children: [
+            // Show small loading indicator when refreshing with existing messages
+            Consumer<MessageDetailsProvider>(
+              builder: (context, provider, _) {
+                if (provider.isLoading && provider.messages.isNotEmpty) {
+                  return SizedBox(
+                    height: 2.h,
+                    child: const LinearProgressIndicator(),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             Expanded(
               child: Consumer<MessageDetailsProvider>(
                 builder: (context, restProvider, child) {
-                  // Always show REST API messages for consistency
-                  if (restProvider.isLoading) {
+                  final messages = restProvider.messages;
+                  
+                  // Only show loading skeleton if no messages exist yet (initial load)
+                  if (restProvider.isLoading && messages.isEmpty) {
                     return ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       shrinkWrap: true,
@@ -240,12 +272,12 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
                     );
                   }
 
-                  final messages = restProvider.messages;
-
-                  if (messages.isEmpty) {
+                  // Show empty state only if not loading and no messages
+                  if (messages.isEmpty && !restProvider.isLoading) {
                     return const Center(child: Text('No messages found'));
                   }
 
+                  // Show existing messages (even while refetching in background)
                   return ListView.builder(
                     padding: EdgeInsets.all(16.w),
                     itemCount: messages.length,
@@ -314,15 +346,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
       return;
     }
 
-    // final socketProvider = Provider.of<MessageSocketProvider>(
-    //   context,
-    //   listen: false,
-    // );
     final sendProvider = Provider.of<MessageSendProvider>(
-      context,
-      listen: false,
-    );
-    final detailsProvider = Provider.of<MessageDetailsProvider>(
       context,
       listen: false,
     );
@@ -330,7 +354,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
     final messageText = _messageController.text.trim();
     final hasFiles = _selectedFiles.isNotEmpty;
 
-    // Always send via REST API POST request
+    // Send via REST API (for file upload support)
     final success = await sendProvider.sendMessage(
       caseId: widget.caseId,
       content: messageText,
@@ -338,14 +362,27 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
     );
 
     if (success) {
+      // Clear input immediately for better UX
       _messageController.clear();
       setState(() {
         _selectedFiles.clear();
       });
 
-      // Wait a bit for backend to process images, then refresh
-      await Future.delayed(const Duration(milliseconds: 500));
-      await detailsProvider.fetchMessageDetails(widget.caseId);
+      // Set flag to prevent immediate refetch
+      justSentMessage = true;
+
+      // After a delay, fetch once to confirm message is saved
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) {
+          justSentMessage = false;
+          Provider.of<MessageDetailsProvider>(
+            context,
+            listen: false,
+          ).fetchMessageDetails(widget.caseId);
+        }
+      });
+
+      debugPrint('✅ Message sent successfully, will refresh shortly...');
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -377,57 +414,64 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
         children: [
           // Show selected files
           if (_selectedFiles.isNotEmpty) ...[
-            Container(
-              height: 80.h,
-              margin: EdgeInsets.only(bottom: 8.h),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _selectedFiles.length,
-                itemBuilder: (context, index) {
-                  return Stack(
-                    children: [
-                      Container(
-                        width: 80.w,
-                        height: 80.h,
-                        margin: EdgeInsets.only(right: 8.w),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.r),
-                          child: Image.file(
-                            _selectedFiles[index],
-                            fit: BoxFit.cover,
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: 80.h,
+                maxWidth: double.infinity,
+              ),
+              child: Container(
+                margin: EdgeInsets.only(bottom: 8.h),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  physics: const ClampingScrollPhysics(),
+                  itemCount: _selectedFiles.length,
+                  itemBuilder: (context, index) {
+                    return Stack(
+                      children: [
+                        Container(
+                          width: 80.w,
+                          height: 80.h,
+                          margin: EdgeInsets.only(right: 8.w),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: Colors.grey.shade300),
                           ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 4.h,
-                        right: 12.w,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedFiles.removeAt(index);
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(4.w),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 12.sp,
-                              color: Colors.white,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.r),
+                            child: Image.file(
+                              _selectedFiles[index],
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                        Positioned(
+                          top: 4.h,
+                          right: 12.w,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedFiles.removeAt(index);
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(4.w),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.close,
+                                size: 12.sp,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -522,10 +566,20 @@ class MessageWidget extends StatelessWidget {
     }
   }
 
+  bool _isValidImageUrl(String url) {
+    if (url.isEmpty) return false;
+    // Reject blob URLs explicitly
+    if (url.startsWith('blob:')) return false;
+    // Only accept http:// or https:// URLs
+    return url.startsWith('http://') || url.startsWith('https://');
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Get attachment URLs directly from the model
-    List<String> imageUrls = message.attachmentUrls ?? [];
+    // Get attachment URLs directly from the model and filter out invalid URLs
+    List<String> imageUrls = (message.attachmentUrls ?? [])
+        .where((url) => _isValidImageUrl(url))
+        .toList();
 
     return Padding(
       padding: EdgeInsets.only(bottom: 20.h),
@@ -535,11 +589,15 @@ class MessageWidget extends StatelessWidget {
           // Avatar
           CircleAvatar(
             radius: 18.r,
-            backgroundImage: message.senderAvatar.isNotEmpty
+            backgroundImage:
+                message.senderAvatar.isNotEmpty &&
+                    _isValidImageUrl(message.senderAvatar)
                 ? NetworkImage(message.senderAvatar)
                 : null,
             backgroundColor: Colors.grey.shade300,
-            child: message.senderAvatar.isEmpty
+            child:
+                message.senderAvatar.isEmpty ||
+                    !_isValidImageUrl(message.senderAvatar)
                 ? Icon(Icons.person, size: 18.sp, color: Colors.white)
                 : null,
           ),
@@ -597,8 +655,11 @@ class MessageWidget extends StatelessWidget {
                 // Image attachments
                 if (imageUrls.isNotEmpty) ...[
                   SizedBox(height: 8.h),
-                  SizedBox(
-                    height: 100.h,
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: 100.h,
+                      maxWidth: double.infinity,
+                    ),
                     child: _buildImageGrid(imageUrls, context),
                   ),
                 ],
@@ -619,6 +680,8 @@ class MessageWidget extends StatelessWidget {
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,
+      shrinkWrap: true,
+      physics: const ClampingScrollPhysics(),
       itemCount: displayCount,
       itemBuilder: (context, index) {
         bool isLast = index == 2 && remainingCount > 0;
@@ -655,7 +718,25 @@ class MessageWidget extends StatelessWidget {
                     width: 100.w,
                     height: 100.h,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 100.w,
+                        height: 100.h,
+                        color: Colors.grey.shade200,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                : null,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      );
+                    },
                     errorBuilder: (context, error, stackTrace) {
+                      debugPrint('Error loading image: $error');
                       return Container(
                         width: 100.w,
                         height: 100.h,
@@ -735,7 +816,20 @@ class ImageGalleryViewer extends StatelessWidget {
               child: Image.network(
                 images[index],
                 fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                          : null,
+                      color: Colors.white,
+                    ),
+                  );
+                },
                 errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Error loading full image: $error');
                   return const Center(
                     child: Icon(
                       Icons.broken_image,
@@ -804,7 +898,23 @@ class ScrollableImageGallery extends StatelessWidget {
               child: Image.network(
                 images[index],
                 fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: Colors.grey.shade200,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                            : null,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                },
                 errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Error loading grid image: $error');
                   return Container(
                     color: Colors.grey.shade300,
                     child: Icon(
