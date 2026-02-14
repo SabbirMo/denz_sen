@@ -38,21 +38,25 @@ class MessageSocketProvider extends ChangeNotifier {
           debugPrint('❌ WebSocket error: $error');
           errorMessage = 'Connection error: $error';
           isConnected = false;
-          notifyListeners();
+          // Schedule notification for next frame to avoid build errors
+          Future.microtask(() => notifyListeners());
         },
         onDone: () {
           debugPrint('🔴 WebSocket connection closed');
           isConnected = false;
-          notifyListeners();
+          // Schedule notification for next frame to avoid build errors
+          Future.microtask(() => notifyListeners());
         },
       );
 
-      notifyListeners();
+      // Schedule notification for next frame to avoid build errors
+      Future.microtask(() => notifyListeners());
     } catch (e) {
       debugPrint('❌ WebSocket connection failed: $e');
       errorMessage = 'Failed to connect: $e';
       isConnected = false;
-      notifyListeners();
+      // Schedule notification for next frame to avoid build errors
+      Future.microtask(() => notifyListeners());
     }
   }
 
@@ -72,7 +76,8 @@ class MessageSocketProvider extends ChangeNotifier {
         if (onNewMessage != null) {
           onNewMessage!();
         }
-        notifyListeners();
+        // Schedule notification for next frame to avoid build errors
+        Future.microtask(() => notifyListeners());
       } else {
         // Log unhandled message types for debugging
         debugPrint(
@@ -93,7 +98,7 @@ class MessageSocketProvider extends ChangeNotifier {
   }) async {
     if (!isConnected || _channel == null) {
       errorMessage = 'Not connected to chat';
-      notifyListeners();
+      Future.microtask(() => notifyListeners());
       return;
     }
 
@@ -107,25 +112,30 @@ class MessageSocketProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('❌ Error sending message: $e');
       errorMessage = 'Failed to send message: $e';
-      notifyListeners();
+      Future.microtask(() => notifyListeners());
     }
   }
 
   // Disconnect WebSocket
-  void disconnect() {
+  void disconnect({bool notify = true}) {
     if (_channel != null) {
       _channel!.sink.close();
       _channel = null;
       isConnected = false;
       hasNewMessage = false;
       debugPrint('🔴 WebSocket disconnected');
-      notifyListeners();
+
+      // Only notify if requested and schedule for next frame
+      if (notify) {
+        Future.microtask(() => notifyListeners());
+      }
     }
   }
 
   @override
   void dispose() {
-    disconnect();
+    // Don't notify listeners during dispose
+    disconnect(notify: false);
     super.dispose();
   }
 }

@@ -30,19 +30,21 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
 
   Timer? _debounceTimer;
   bool justSentMessage = false;
+  MessageSocketProvider? _socketProvider; // Save reference for dispose
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final socketProvider = Provider.of<MessageSocketProvider>(
+        // Save provider reference for later use in dispose
+        _socketProvider = Provider.of<MessageSocketProvider>(
           context,
           listen: false,
         );
 
         // Set callback to refresh when new message arrives via WebSocket
-        socketProvider.onNewMessage = () {
+        _socketProvider!.onNewMessage = () {
           if (mounted) {
             // Debounce: wait a bit before fetching to avoid rapid reloads
             _debounceTimer?.cancel();
@@ -58,7 +60,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
         };
 
         // Connect to WebSocket for real-time messaging
-        socketProvider.connect(widget.caseId);
+        _socketProvider!.connect(widget.caseId);
 
         // Fallback: Load message history via REST API
         Provider.of<MessageDetailsProvider>(
@@ -71,12 +73,8 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
 
   @override
   void dispose() {
-    // Disconnect WebSocket when leaving page
-    final socketProvider = Provider.of<MessageSocketProvider>(
-      context,
-      listen: false,
-    );
-    socketProvider.disconnect();
+    // Disconnect WebSocket using saved reference (no notification during dispose)
+    _socketProvider?.disconnect(notify: false);
 
     _debounceTimer?.cancel();
     _messageController.dispose();
@@ -260,7 +258,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
               child: Consumer<MessageDetailsProvider>(
                 builder: (context, restProvider, child) {
                   final messages = restProvider.messages;
-                  
+
                   // Only show loading skeleton if no messages exist yet (initial load)
                   if (restProvider.isLoading && messages.isEmpty) {
                     return ListView.builder(
