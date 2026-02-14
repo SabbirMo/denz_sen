@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               final dispatch = ref.dispatchesNearby[index];
                               final id = dispatch.id ?? 'N/A';
                               return Card(
-                                margin: EdgeInsets.only(bottom: 12.h),
+                                margin: EdgeInsets.only(bottom: 14.h),
                                 color: AppColors.offWhite,
                                 child: ListTile(
                                   onTap: () {

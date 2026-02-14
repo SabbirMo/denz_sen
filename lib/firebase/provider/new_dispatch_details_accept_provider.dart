@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:denz_sen/core/base_url/base_url.dart';
 import 'package:denz_sen/firebase/firebase_notification_service.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,11 @@ class NewDispatchDetailsAcceptProvider extends ChangeNotifier {
   bool isAccepting = false;
   String? errorMessage;
   bool? success;
+
+  void clearError() {
+    errorMessage = null;
+    notifyListeners();
+  }
 
   Future<bool> acceptDispatch() async {
     isAccepting = true;
@@ -51,7 +57,13 @@ class NewDispatchDetailsAcceptProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        errorMessage = 'Failed to accept dispatch';
+        // Parse error response
+        try {
+          final responseData = jsonDecode(response.body);
+          errorMessage = responseData['detail'] ?? 'Failed to accept dispatch';
+        } catch (e) {
+          errorMessage = 'Failed to accept dispatch';
+        }
         debugPrint('❌ $errorMessage');
         isAccepting = false;
         success = false;

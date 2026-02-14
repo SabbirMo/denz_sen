@@ -58,6 +58,14 @@ class DispatchAlertBottomSheet {
       return;
     }
 
+    // Clear any previous error messages before showing bottom sheet
+    if (context.mounted) {
+      Provider.of<NewDispatchDetailsAcceptProvider>(
+        context,
+        listen: false,
+      ).clearError();
+    }
+
     // Show bottom sheet with data
     showModalBottomSheet(
       context: context,
@@ -153,6 +161,45 @@ class DispatchAlertBottomSheet {
                   ),
                 ),
                 AppSpacing.h10,
+                Consumer<NewDispatchDetailsAcceptProvider>(
+                  builder: (context, acceptProvider, _) {
+                    if (acceptProvider.errorMessage != null) {
+                      return Column(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(12.w),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(color: Colors.red, width: 1),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red,
+                                  size: 20.sp,
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Text(
+                                    acceptProvider.errorMessage!,
+                                    style: AppStyle.semiBook14.copyWith(
+                                      color: Colors.red.shade900,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          AppSpacing.h10,
+                        ],
+                      );
+                    }
+                    return SizedBox.shrink();
+                  },
+                ),
                 GridView(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -167,28 +214,23 @@ class DispatchAlertBottomSheet {
                       builder: (context, ref, _) => CustomButton(
                         buttonText: ('Yes'),
                         backgroundColor: AppColors.green,
-                        onPressed: () async {
-                          final success = await ref.acceptDispatch();
-                          if (success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Dispatch accepted successfully!',
-                                ),
-                              ),
-                            );
-                            Navigator.of(context).pop();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  ref.errorMessage ??
-                                      'Failed to accept dispatch',
-                                ),
-                              ),
-                            );
-                          }
-                        },
+                        onPressed: ref.isAccepting
+                            ? null
+                            : () async {
+                                final success = await ref.acceptDispatch();
+                                if (success && context.mounted) {
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Dispatch accepted successfully!',
+                                      ),
+                                      backgroundColor: AppColors.green,
+                                    ),
+                                  );
+                                }
+                                // Error message will be shown inline above buttons
+                              },
                       ),
                     ),
                     CustomButton(
