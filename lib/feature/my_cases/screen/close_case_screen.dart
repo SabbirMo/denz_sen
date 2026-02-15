@@ -1,7 +1,6 @@
 import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_spacing.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
-import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/feature/home/widget/dispatch_alert_bottom_sheet.dart';
 import 'package:denz_sen/feature/my_cases/provider/my_cases_provider.dart';
 import 'package:denz_sen/feature/my_cases/widget/case_shimmer.dart';
@@ -180,21 +179,6 @@ class _CloseCaseScreenState extends State<CloseCaseScreen> {
                             ],
                           ),
                           secondChild: SizedBox.shrink(),
-                        ),
-                        Divider(thickness: 1.h, color: AppColors.border),
-                        AppSpacing.h4,
-                        CustomButton(
-                          buttonText: 'Collaborate',
-                          onPressed: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         MessageDetailsPage(caseId: caseData.id),
-                            //   ),
-                            // );
-                          },
-                          icon: Icons.message_outlined,
                         ),
                       ],
                     ),

@@ -87,7 +87,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
     final success = await provider.updateUserInformation(
       fullName: fullNameController.text.trim(),
       phone: phoneNumberController.text.trim(),
-      avatarUrl: imageFile?.path,
+      avatarPath: imageFile?.path,
     );
 
     if (!mounted) return;

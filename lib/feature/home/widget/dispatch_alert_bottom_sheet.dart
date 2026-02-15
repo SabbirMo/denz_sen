@@ -200,44 +200,48 @@ class DispatchAlertBottomSheet {
                     return SizedBox.shrink();
                   },
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Consumer<NewDispatchDetailsAcceptProvider>(
-                        builder: (context, ref, _) => CustomButton(
-                          buttonText: ('Yes'),
-                          backgroundColor: AppColors.green,
-                          onPressed: ref.isAccepting
-                              ? null
-                              : () async {
-                                  final success = await ref.acceptDispatch();
-                                  if (success && context.mounted) {
-                                    Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Dispatch accepted successfully!',
+                SafeArea(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Consumer<NewDispatchDetailsAcceptProvider>(
+                          builder: (context, ref, _) => CustomButton(
+                            buttonText: ('Yes'),
+                            backgroundColor: AppColors.green,
+                            onPressed: ref.isAccepting
+                                ? null
+                                : () async {
+                                    final success = await ref.acceptDispatch();
+                                    if (success && context.mounted) {
+                                      Navigator.of(context).pop();
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Dispatch accepted successfully!',
+                                          ),
+                                          backgroundColor: AppColors.green,
                                         ),
-                                        backgroundColor: AppColors.green,
-                                      ),
-                                    );
-                                  }
-                                  // Error message will be shown inline above buttons
-                                },
+                                      );
+                                    }
+                                    // Error message will be shown inline above buttons
+                                  },
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: CustomButton(
-                        buttonText: ('No'),
-                        backgroundColor: AppColors.red,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: CustomButton(
+                          buttonText: ('No'),
+                          backgroundColor: AppColors.red,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
