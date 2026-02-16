@@ -17,6 +17,7 @@ import 'package:denz_sen/feature/submit_report/screen/submit_report_screen.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -123,14 +124,33 @@ class _HomeScreenState extends State<HomeScreen> {
                             onMapCreated: (GoogleMapController controller) {
                               mapController = controller;
                             },
-                            onTap: (LatLng position) {
+                            onTap: (LatLng position) async {
+                              // Geocoding for clicked location
+                              String address = "Address not found";
+                              try {
+                                List<Placemark> placemarks =
+                                    await placemarkFromCoordinates(
+                                      position.latitude,
+                                      position.longitude,
+                                    );
+                                if (placemarks.isNotEmpty) {
+                                  Placemark place = placemarks.first;
+                                  address =
+                                      '${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}';
+                                }
+                              } catch (e) {
+                                print('Geocoding error: $e');
+                                address = 'Unable to get address';
+                              }
+
                               setState(() {
                                 markers = {
                                   Marker(
                                     markerId: MarkerId('selected-location'),
                                     position: position,
                                     infoWindow: InfoWindow(
-                                      title: position.toString(),
+                                      title: 'Selected Location',
+                                      snippet: address,
                                     ),
                                   ),
                                 };
@@ -451,6 +471,22 @@ class _HomeScreenState extends State<HomeScreen> {
         );
 
         if (success) {
+          // Geocoding: LatLng → Address
+          String address = "Address not found";
+          try {
+            List<Placemark> placemarks = await placemarkFromCoordinates(
+              position.latitude,
+              position.longitude,
+            );
+            if (placemarks.isNotEmpty) {
+              Placemark place = placemarks.first;
+              address =
+                  '${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}';
+            }
+          } catch (e) {
+            print('Geocoding error: $e');
+          }
+
           setState(() {
             currentPosition = position;
             markers = {
@@ -459,8 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 position: LatLng(position.latitude, position.longitude),
                 infoWindow: InfoWindow(
                   title: 'My Location',
-                  snippet:
-                      'Lat: ${position.latitude}, Long: ${position.longitude}',
+                  snippet: address, // ekhane address show hobe
                 ),
               ),
             };

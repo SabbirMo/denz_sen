@@ -391,74 +391,54 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  SizedBox(width: 8.w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.location_on,
-                        color: AppColors.primaryColor,
-                        size: 24,
+                      Text(
+                        'Selected Location',
+                        style: AppStyle.book14.copyWith(color: AppColors.grey),
                       ),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Selected Location',
+                      SizedBox(height: 12.h),
+                      _isLoading
+                          ? Center(
+                              child: const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              _selectedAddress,
                               style: AppStyle.book14.copyWith(
                                 color: AppColors.grey,
                               ),
                             ),
-                            SizedBox(height: 4.h),
-                            _isLoading
-                                ? const SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(
-                                    _selectedAddress,
-                                    style: AppStyle.semiBook14,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    'Lat: ${_selectedPosition.latitude.toStringAsFixed(6)}, Lng: ${_selectedPosition.longitude.toStringAsFixed(6)}',
-                    style: AppStyle.book14.copyWith(color: AppColors.grey),
-                  ),
+
                   SizedBox(height: 16.h),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50.h,
-                    child: ElevatedButton(
-                      onPressed: _confirmLocation,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.r),
+                  SafeArea(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 44.h,
+                      child: ElevatedButton(
+                        onPressed: _confirmLocation,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Confirm Location',
+                          style: AppStyle.semiBook14.copyWith(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        'Confirm Location',
-                        style: AppStyle.semiBook16.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Center(
-                    child: Text(
-                      'Tap on map or drag marker to select location',
-                      style: AppStyle.book14.copyWith(color: AppColors.grey),
                     ),
                   ),
                 ],

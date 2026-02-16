@@ -45,7 +45,7 @@
             android:value="2" />
 
         <!-- Google Maps API Key -->
-        <!-- Current: AIzaSyBpD1p4hQ3su-aayuiQ226ZDXQRqK1cIok -->
+        <!-- Current: AIzaSyBbNXEsdj53mZw0Mzz-k8ZyjOWaL0qmgQ0 -->
         <!-- 
         ⚠️ If Maps not working:
         1. Go to: https://console.cloud.google.com/google/maps-apis/credentials
@@ -55,7 +55,7 @@
         5. Or create NEW API key and replace below
         -->
         <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="AIzaSyBpD1p4hQ3su-aayuiQ226ZDXQRqK1cIok"/>
+               android:value="AIzaSyBbNXEsdj53mZw0Mzz-k8ZyjOWaL0qmgQ0"/>
 
         <!-- Firebase Cloud Messaging -->
         <meta-data
