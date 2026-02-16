@@ -24,7 +24,7 @@ class FcmTokenApi {
       var response = await client.patch(
         Uri.parse('$baseUrl/api/v1/users/me/device-token'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'fcm_token': fcmToken, 'device_type': 'android'}),
+        body: jsonEncode({'fcm_token': fcmToken}),
       );
 
       print('📡 Response status: ${response.statusCode}');
@@ -36,7 +36,7 @@ class FcmTokenApi {
         response = await client.patch(
           Uri.parse('$baseUrl/api/v1/users/me/device-token'),
           headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'fcm_token': fcmToken, 'device_type': 'android'}),
+          body: jsonEncode({'fcm_token': fcmToken}),
         );
 
         print('📡 PATCH Response status: ${response.statusCode}');
