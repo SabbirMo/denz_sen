@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBBjz0BBog8yUR7XxC02Y6HXMJZDLGfvak',
-    appId: '1:541992756011:android:619a5847a47875c3bf1b6e',
-    messagingSenderId: '541992756011',
-    projectId: 'denzsen-notification',
-    storageBucket: 'denzsen-notification.firebasestorage.app',
+    apiKey: 'AIzaSyDSMZgMZ2XAHNdMMNpaGx28xHgTIzUCHn0',
+    appId: '1:201066682304:android:2a795a6cdabdf3745a1a25',
+    messagingSenderId: '201066682304',
+    projectId: 'cop-program-a9013',
+    storageBucket: 'cop-program-a9013.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDuIum4XpO4vfuo_eEuiWDW4VdbrW5srgU',
-    appId: '1:541992756011:ios:c11f654599f156debf1b6e',
-    messagingSenderId: '541992756011',
-    projectId: 'denzsen-notification',
-    storageBucket: 'denzsen-notification.firebasestorage.app',
+    apiKey: 'AIzaSyCKxArZk7KkeAnn2spUotiIn2MFyM5sZ94',
+    appId: '1:201066682304:ios:3c91712256ba5d645a1a25',
+    messagingSenderId: '201066682304',
+    projectId: 'cop-program-a9013',
+    storageBucket: 'cop-program-a9013.firebasestorage.app',
     iosBundleId: 'com.example.denzSen',
   );
+
 }

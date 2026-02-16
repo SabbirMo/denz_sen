@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "541992756011",
-    "project_id": "denzsen-notification",
-    "storage_bucket": "denzsen-notification.firebasestorage.app"
+    "project_number": "201066682304",
+    "project_id": "cop-program-a9013",
+    "storage_bucket": "cop-program-a9013.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:541992756011:android:619a5847a47875c3bf1b6e",
+        "mobilesdk_app_id": "1:201066682304:android:2a795a6cdabdf3745a1a25",
         "android_client_info": {
           "package_name": "com.example.denz_sen"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBBjz0BBog8yUR7XxC02Y6HXMJZDLGfvak"
+          "current_key": "AIzaSyDSMZgMZ2XAHNdMMNpaGx28xHgTIzUCHn0"
         }
       ],
       "services": {
