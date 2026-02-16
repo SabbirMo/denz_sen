@@ -6,6 +6,7 @@ import 'package:denz_sen/core/widget/custom_button.dart';
 import 'package:denz_sen/core/widget/custom_filed.dart';
 import 'package:denz_sen/core/widget/location_picker_widget.dart';
 import 'package:denz_sen/feature/submit_report/provider/report_submit_provider.dart';
+import 'package:denz_sen/feature/submit_report/service/geocoding_service.dart';
 import 'package:denz_sen/feature/success_screen/success_screen_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -30,6 +31,8 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
   final TextEditingController _zipCodeController = TextEditingController();
   final TextEditingController _detailController = TextEditingController();
   final TextEditingController _actionsController = TextEditingController();
+  final GeocodingService _geocodingService = GeocodingService();
+  bool isLoadingAddress = false;
 
   @override
   void initState() {
@@ -46,7 +49,11 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
           widget.preSelectedLocation!.longitude,
           'Location from map',
         );
-        _addressController.text = 'Location selected from home map';
+        // Fetch address details from API
+        _fetchAddressDetails(
+          widget.preSelectedLocation!.latitude,
+          widget.preSelectedLocation!.longitude,
+        );
       });
     }
   }
@@ -79,6 +86,41 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
     }
   }
 
+  Future<void> _fetchAddressDetails(double lat, double lng) async {
+    setState(() {
+      isLoadingAddress = true;
+    });
+
+    try {
+      final addressData = await _geocodingService.getAddressFromLatLng(
+        lat,
+        lng,
+      );
+
+      if (addressData != null && mounted) {
+        setState(() {
+          _addressController.text = addressData['address'] ?? '';
+          _cityController.text = addressData['city'] ?? '';
+          _stateController.text = addressData['state'] ?? '';
+          _zipCodeController.text = addressData['zipCode'] ?? '';
+          isLoadingAddress = false;
+        });
+      } else if (mounted) {
+        setState(() {
+          isLoadingAddress = false;
+        });
+        _showError('Failed to fetch address details');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoadingAddress = false;
+        });
+        _showError('Error fetching address: $e');
+      }
+    }
+  }
+
   void _openLocationPicker() {
     Navigator.push(
       context,
@@ -89,10 +131,13 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
               context,
               listen: false,
             ).setLocation(lat, lng, address);
-            _addressController.text = address;
+
+            // Fetch address details from API
+            _fetchAddressDetails(lat, lng);
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Location selected successfully'),
+                content: Text('Fetching address details...'),
                 backgroundColor: Colors.green,
                 duration: Duration(seconds: 2),
               ),
@@ -227,37 +272,7 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
                         ),
                       ),
                     ),
-                    if (provider.latitude != null && provider.longitude != null)
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 8.h,
-                        ),
-                        margin: EdgeInsets.only(bottom: 16.h),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.green),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
-                              size: 20,
-                            ),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: Text(
-                                'Location: ${provider.latitude?.toStringAsFixed(6)}, ${provider.longitude?.toStringAsFixed(6)}',
-                                style: AppStyle.book14.copyWith(
-                                  color: Colors.green.shade700,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+
                     CustomField(
                       title: 'State (Optional)',
                       hintText: 'Enter state',
