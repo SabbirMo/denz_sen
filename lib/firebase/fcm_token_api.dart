@@ -21,7 +21,7 @@ class FcmTokenApi {
 
       // Try PUT method first (most REST APIs use PUT for update/set operations)
       print('🔄 Attempting PUT method...');
-      var response = await client.put(
+      var response = await client.patch(
         Uri.parse('$baseUrl/api/v1/users/me/device-token'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'fcm_token': fcmToken, 'device_type': 'android'}),
