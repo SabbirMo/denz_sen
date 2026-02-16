@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CloseCasesProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -16,18 +15,13 @@ class CloseCasesProvider extends ChangeNotifier {
     success = null;
     notifyListeners();
     final uri = Uri.parse('$baseUrl/api/v1/cases/$caseId/close');
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
       debugPrint('Closing case $caseId...');
       debugPrint('API URL: $uri');
 
-      final response = await http.post(
-        uri,
-        headers: {'authorization': 'Bearer $accessToken'},
-      );
+      final response = await client.post(uri);
 
       debugPrint('Response status: ${response.statusCode}');
       debugPrint('Response body: ${response.body}');

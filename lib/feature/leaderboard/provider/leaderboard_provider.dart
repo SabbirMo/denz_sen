@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Badge {
   final String name;
@@ -71,25 +70,13 @@ class LeaderboardProvider extends ChangeNotifier {
     debugPrint('🔄 Fetching gamification data...');
 
     final url = Uri.parse('$baseUrl/api/v1/users/gamification');
+    final client = AuthenticatedClient();
     debugPrint('API URL: $url');
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
-      if (accessToken == null) {
-        errorMessage = 'No access token found';
-        isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      final response = await http.get(
+      final response = await client.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       debugPrint('Response Status Code: ${response.statusCode}');

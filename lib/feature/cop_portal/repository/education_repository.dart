@@ -1,26 +1,20 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import '../../../core/base_url/base_url.dart';
 import '../model/education_model.dart';
 
 class EducationRepository {
   Future<EducationHomeResponse?> fetchEducationHome() async {
+    final client = AuthenticatedClient();
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
       final uri = Uri.parse('$baseUrl/api/v1/education/home');
 
       log('Fetching education data from: $uri');
-      log('Access Token: ${accessToken != null ? 'Present' : 'Missing'}');
 
-      final response = await http.get(
+      final response = await client.get(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       log('Response Status Code: ${response.statusCode}');

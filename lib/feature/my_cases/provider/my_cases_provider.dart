@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:denz_sen/feature/my_cases/model/my_cases_model.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MyCasesProvider extends ChangeNotifier {
   bool isLoadingActive = false;
@@ -31,19 +30,14 @@ class MyCasesProvider extends ChangeNotifier {
       errorMessagePending = null;
     }
     notifyListeners();
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
       final uri = Uri.parse('$baseUrl/api/v1/cases/?status=$status');
       debugPrint('Fetching cases with status: $status');
       debugPrint('API URL: $uri');
 
-      final response = await http.get(
-        uri,
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
+      final response = await client.get(uri);
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);

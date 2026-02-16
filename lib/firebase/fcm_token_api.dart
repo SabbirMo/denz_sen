@@ -1,4 +1,4 @@
-import 'package:http/http.dart' as http;
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:denz_sen/core/base_url/base_url.dart';
@@ -6,12 +6,13 @@ import 'package:denz_sen/core/base_url/base_url.dart';
 class FcmTokenApi {
   /// FCM Token backend এ save করুন
   static Future<bool> sendTokenToBackend(String fcmToken) async {
+    final client = AuthenticatedClient();
     try {
       print('📤 Sending FCM token to backend...');
 
       // User এর auth token get করুন
       final prefs = await SharedPreferences.getInstance();
-      final authToken = prefs.getString('token') ?? '';
+      final authToken = prefs.getString('access_token') ?? '';
 
       if (authToken.isEmpty) {
         print('⚠️ No auth token found. User might not be logged in.');
@@ -20,12 +21,9 @@ class FcmTokenApi {
 
       // Try PUT method first (most REST APIs use PUT for update/set operations)
       print('🔄 Attempting PUT method...');
-      var response = await http.put(
+      var response = await client.put(
         Uri.parse('$baseUrl/api/v1/users/me/device-token'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'fcm_token': fcmToken, 'device_type': 'android'}),
       );
 
@@ -35,12 +33,9 @@ class FcmTokenApi {
       // If PUT fails with 405, try PATCH
       if (response.statusCode == 405) {
         print('⚠️ PUT not allowed, trying PATCH method...');
-        response = await http.patch(
+        response = await client.patch(
           Uri.parse('$baseUrl/api/v1/users/me/device-token'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $authToken',
-          },
+          headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'fcm_token': fcmToken, 'device_type': 'android'}),
         );
 
@@ -91,20 +86,20 @@ class FcmTokenApi {
 
   /// Token delete করুন backend থেকে (Logout এর সময়)
   static Future<bool> deleteTokenFromBackend() async {
+    final client = AuthenticatedClient();
     try {
       print('🗑️ Deleting FCM token from backend...');
 
       final prefs = await SharedPreferences.getInstance();
-      final authToken = prefs.getString('token') ?? '';
+      final authToken = prefs.getString('access_token') ?? '';
 
       if (authToken.isEmpty) {
         print('⚠️ No auth token found.');
         return false;
       }
 
-      final response = await http.delete(
+      final response = await client.delete(
         Uri.parse('$baseUrl/api/v1/users/me/device-token'),
-        headers: {'Authorization': 'Bearer $authToken'},
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {

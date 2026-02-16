@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CopPortalMessageSendProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -21,52 +21,49 @@ class CopPortalMessageSendProvider extends ChangeNotifier {
     notifyListeners();
 
     final url = Uri.parse('$baseUrl/api/v1/chat/global');
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('access_token');
+      // Prepare fields
+      final fields = {'content': content};
 
-      // Create multipart request for file uploads
-      var request = http.MultipartRequest('POST', url);
-      request.headers['authorization'] = 'Bearer $token';
-
-      // Add message content
-      request.fields['content'] = content;
-
-      // Add attachments if any
+      // Prepare attachments
+      final multipartFiles = <http.MultipartFile>[];
       if (attachments != null && attachments.isNotEmpty) {
-        for (var i = 0; i < attachments.length; i++) {
-          var file = attachments[i];
+        for (var file in attachments) {
           var stream = http.ByteStream(file.openRead());
           var length = await file.length();
-
           var multipartFile = http.MultipartFile(
             'files',
             stream,
             length,
             filename: file.path.split(Platform.pathSeparator).last,
           );
-          request.files.add(multipartFile);
+          multipartFiles.add(multipartFile);
           debugPrint('📎 Added file: ${multipartFile.filename}');
         }
-        debugPrint('📎 Total files to upload: ${request.files.length}');
+        debugPrint('📎 Total files to upload: ${multipartFiles.length}');
       }
 
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
+      final response = await client.multipart(
+        'POST',
+        url,
+        fields: fields,
+        files: multipartFiles,
+      );
 
       debugPrint('📤 Response Status: ${response.statusCode}');
-      debugPrint('📤 Response Body: $responseBody');
+      debugPrint('📤 Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(responseBody);
+        final data = jsonDecode(response.body);
         successMessage = 'Message sent successfully';
         debugPrint('✅ Message sent successfully');
         debugPrint('✅ Response data: $data');
         return true;
       } else {
         errorMessage = 'Failed to send message: ${response.statusCode}';
-        debugPrint('❌ $errorMessage - Response: $responseBody');
+        debugPrint('❌ $errorMessage - Response: ${response.body}');
         return false;
       }
     } catch (e) {

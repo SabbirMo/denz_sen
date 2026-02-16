@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:denz_sen/feature/my_message/model/add_member_model.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class AddMemberProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -15,11 +14,9 @@ class AddMemberProvider extends ChangeNotifier {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
       final queryParams = <String, String>{'case_id': caseId.toString()};
       if (query.isNotEmpty) {
         queryParams['query'] = query;
@@ -28,10 +25,7 @@ class AddMemberProvider extends ChangeNotifier {
       final uri = Uri.parse(
         '$baseUrl/api/v1/users/search',
       ).replace(queryParameters: queryParams);
-      final response = await http.get(
-        uri,
-        headers: {'authorization': 'Bearer $accessToken'},
-      );
+      final response = await client.get(uri);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
@@ -56,16 +50,13 @@ class AddMemberProvider extends ChangeNotifier {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
       final uri = Uri.parse('$baseUrl/api/v1/cases/$caseId/members');
-      final response = await http.post(
+      final response = await client.post(
         uri,
         headers: {
-          'authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },

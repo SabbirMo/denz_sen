@@ -1,25 +1,20 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import '../../../core/base_url/base_url.dart';
 import '../model/global_chat_model.dart';
 
 class CopPortalCommsRepository {
   Future<List<GlobalChatMessage>> fetchGlobalChat() async {
+    final client = AuthenticatedClient();
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
       final uri = Uri.parse('$baseUrl/api/v1/chat/global');
 
       log('Fetching global chat from: $uri');
 
-      final response = await http.get(
+      final response = await client.get(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       log('Chat Response Status: ${response.statusCode}');
@@ -38,19 +33,15 @@ class CopPortalCommsRepository {
   }
 
   Future<GlobalChatMessage?> sendMessage(String content) async {
+    final client = AuthenticatedClient();
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
       final uri = Uri.parse('$baseUrl/api/v1/chat/global');
 
       log('Sending message to: $uri');
 
-      final response = await http.post(
+      final response = await client.post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'content': content, 'attachment_urls': []}),
       );
 

@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:denz_sen/feature/my_message/model/message_details_model.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MessageDetailsProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -15,16 +14,11 @@ class MessageDetailsProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     final url = Uri.parse('$baseUrl/api/v1/chat/$caseId/messages');
+    final client = AuthenticatedClient();
     debugPrint('🔄 Fetching message details for case ID: $caseId');
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('access_token');
-
-      final response = await http.get(
-        url,
-        headers: {'authorization': 'Bearer $token'},
-      );
+      final response = await client.get(url);
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);

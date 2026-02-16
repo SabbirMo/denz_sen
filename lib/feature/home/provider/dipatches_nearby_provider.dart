@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:denz_sen/feature/home/model/dispatches_nearby_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class DipatchesNearbyProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -19,15 +19,10 @@ class DipatchesNearbyProvider extends ChangeNotifier {
     notifyListeners();
 
     final uri = Uri.parse('$baseUrl/api/v1/dispatches/nearby');
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('access_token');
-
-      final response = await http.get(
-        uri,
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      final response = await client.get(uri);
 
       print('Response Status: ${response.statusCode}');
 
@@ -87,5 +82,13 @@ class DipatchesNearbyProvider extends ChangeNotifier {
       debugPrint('❌ Error getting dispatch IDs: $e');
       return null;
     }
+  }
+
+  /// Clear all data (used when refreshing tokens)
+  void clearData() {
+    dispatchesNearby = [];
+    isLoading = false;
+    errorMessage = null;
+    notifyListeners();
   }
 }

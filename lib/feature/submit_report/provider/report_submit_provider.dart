@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ReportSubmitProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -57,64 +57,57 @@ class ReportSubmitProvider extends ChangeNotifier {
     debugPrint('📍 Latitude: $latitude');
     debugPrint('📍 Longitude: $longitude');
     debugPrint('📅 Event Date: $eventDate');
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
+      final uri = Uri.parse('$baseUrl/api/v1/reports/');
 
-      if (accessToken == null) {
-        errorMessage = 'No access token found';
-        isLoading = false;
-        notifyListeners();
-        return false;
-      }
+      // Prepare fields
+      final fields = {
+        'event_date': eventDate,
+        'details': details,
+        'actions_taken': actionsTaken,
+        'latitude': latitude.toString(),
+        'longitude': longitude.toString(),
+      };
 
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$baseUrl/api/v1/reports/'),
-      );
-
-      request.headers['Authorization'] = 'Bearer $accessToken';
-
-      // Mandatory fields
-      request.fields['event_date'] = eventDate;
-      request.fields['details'] = details;
-      request.fields['actions_taken'] = actionsTaken;
-      request.fields['latitude'] = latitude.toString();
-      request.fields['longitude'] = longitude.toString();
-
-      // Optional fields (auto-filled from GPS if empty)
+      // Optional fields
       if (address != null && address.isNotEmpty) {
-        request.fields['address'] = address;
+        fields['address'] = address;
       }
       if (state != null && state.isNotEmpty) {
-        request.fields['state'] = state;
+        fields['state'] = state;
       }
       if (city != null && city.isNotEmpty) {
-        request.fields['city'] = city;
+        fields['city'] = city;
       }
       if (zipCode != null && zipCode.isNotEmpty) {
-        request.fields['zip_code'] = zipCode;
+        fields['zip_code'] = zipCode;
       }
 
-      // Add files (images/videos)
+      // Prepare files
+      final multipartFiles = <http.MultipartFile>[];
       if (files != null && files.isNotEmpty) {
         for (var file in files) {
-          request.files.add(
+          multipartFiles.add(
             await http.MultipartFile.fromPath('files', file.path),
           );
         }
         debugPrint('📎 Attached ${files.length} files');
       }
 
-      debugPrint('📤 Sending request to: ${request.url}');
-      debugPrint('📋 Fields: ${request.fields}');
+      debugPrint('📤 Sending request to: $uri');
+      debugPrint('📋 Fields: $fields');
 
-      var response = await request.send();
-      var responseBody = await response.stream.bytesToString();
+      final response = await client.multipart(
+        'POST',
+        uri,
+        fields: fields,
+        files: multipartFiles,
+      );
 
       debugPrint('📥 Response Status: ${response.statusCode}');
-      debugPrint('📥 Response Body: $responseBody');
+      debugPrint('📥 Response Body: ${response.body}');
 
       isLoading = false;
 
@@ -126,7 +119,7 @@ class ReportSubmitProvider extends ChangeNotifier {
         return true;
       } else {
         try {
-          final Map<String, dynamic> errorData = jsonDecode(responseBody);
+          final Map<String, dynamic> errorData = jsonDecode(response.body);
           errorMessage =
               errorData['detail'] ??
               errorData['message'] ??

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class EditInformationProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -20,31 +20,16 @@ class EditInformationProvider extends ChangeNotifier {
     notifyListeners();
 
     final Uri url = Uri.parse('$baseUrl/api/v1/users/me');
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
-      if (accessToken == null) {
-        errorMessage = 'No access token found';
-        isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      // 🔥 Create Multipart Request
-      var request = http.MultipartRequest('PATCH', url);
-
-      // 🔐 Add Authorization Header
-      request.headers['Authorization'] = 'Bearer $accessToken';
-
-      // 📝 Add Form Fields
-      request.fields['full_name'] = fullName;
-      request.fields['phone'] = phone;
+      // 📝 Prepare fields
+      final fields = {'full_name': fullName, 'phone': phone};
 
       // 📷 Add Image if exists
+      final files = <http.MultipartFile>[];
       if (avatarPath != null && avatarPath.isNotEmpty) {
-        request.files.add(
+        files.add(
           await http.MultipartFile.fromPath(
             'avatar', // backend field name
             avatarPath,
@@ -53,8 +38,12 @@ class EditInformationProvider extends ChangeNotifier {
       }
 
       // 🚀 Send Request
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
+      final response = await client.multipart(
+        'PATCH',
+        url,
+        fields: fields,
+        files: files,
+      );
 
       debugPrint('Status Code: ${response.statusCode}');
       debugPrint('Response Body: ${response.body}');

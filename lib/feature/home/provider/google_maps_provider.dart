@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleMapsProvider extends ChangeNotifier {
   String? errorMessage;
@@ -19,24 +18,12 @@ class GoogleMapsProvider extends ChangeNotifier {
     final url = Uri.parse(
       '$baseUrl/api/v1/users/me/location?lat=$latitude&long=$longitude',
     );
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('access_token');
-
-      if (accessToken == null) {
-        errorMessage = 'No access token found';
-        isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      final response = await http.patch(
+      final response = await client.patch(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

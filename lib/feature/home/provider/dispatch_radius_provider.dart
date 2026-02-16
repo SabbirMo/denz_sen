@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DispatchRadiusProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -32,25 +31,13 @@ class DispatchRadiusProvider extends ChangeNotifier {
     final url = Uri.parse(
       '$baseUrl/api/v1/users/me/dispatch-radius',
     ).replace(queryParameters: {'dispatch_radius': dispatchRadius.toString()});
+    final client = AuthenticatedClient();
     debugPrint('API URL: $url');
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
-      if (accessToken == null) {
-        errorMessage = 'No access token found';
-        isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      final response = await http.patch(
+      final response = await client.patch(
         url,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       debugPrint('Response Status Code: ${response.statusCode}');

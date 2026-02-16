@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:denz_sen/feature/home/model/get_profile_model.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class ProfileShowProvider extends ChangeNotifier {
   String? errorMessage;
@@ -18,19 +17,14 @@ class ProfileShowProvider extends ChangeNotifier {
     errorMessage = null;
     successMessage = null;
     notifyListeners();
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
       final url = Uri.parse('$baseUrl/api/v1/users/me');
 
-      final response = await http.get(
+      final response = await client.get(
         url,
-        headers: {
-          'authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
@@ -59,5 +53,14 @@ class ProfileShowProvider extends ChangeNotifier {
       notifyListeners();
       return null;
     }
+  }
+
+  /// Clear all data (used when refreshing tokens)
+  void clearData() {
+    profile = null;
+    isLoading = false;
+    errorMessage = null;
+    successMessage = null;
+    notifyListeners();
   }
 }

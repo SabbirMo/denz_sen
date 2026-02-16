@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class MyCasesPendingDispatchProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -14,17 +13,12 @@ class MyCasesPendingDispatchProvider extends ChangeNotifier {
     errorMessage = null;
     success = null;
     notifyListeners();
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
       final uri = Uri.parse('$baseUrl/api/v1/cases/$caseId/dispatch');
 
-      final response = await http.post(
-        uri,
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
+      final response = await client.post(uri);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

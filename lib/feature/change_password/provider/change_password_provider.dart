@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class ChangePasswordProvider extends ChangeNotifier {
   bool currentPassword = true;
@@ -47,19 +46,14 @@ class ChangePasswordProvider extends ChangeNotifier {
     errorMessage = null;
     isSuccess = null;
     notifyListeners();
+    final client = AuthenticatedClient();
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('access_token');
-
       final uri = Uri.parse('$baseUrl/api/v1/users/me/password');
 
-      final response = await http.post(
+      final response = await client.post(
         uri,
-        headers: {
-          'authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'current_password': currentPassword,
           'new_password': newPassword,

@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ContactUsProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -20,22 +19,17 @@ class ContactUsProvider extends ChangeNotifier {
 
     debugPrint('🔄 Sending contact us message...');
     final url = Uri.parse('$baseUrl/api/v1/education/contact');
+    final client = AuthenticatedClient();
     debugPrint('API URL: $url');
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('access_token');
-
       final requestBody = {'subject': subject, 'description': description};
 
       debugPrint('Request Body: $requestBody');
 
-      final response = await http.post(
+      final response = await client.post(
         url,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
 

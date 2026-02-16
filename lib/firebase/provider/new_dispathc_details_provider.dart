@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:denz_sen/core/base_url/base_url.dart';
+import 'package:denz_sen/core/http/authenticated_client.dart';
 import 'package:denz_sen/firebase/firebase_notification_service.dart';
 import 'package:denz_sen/firebase/model/dispatch_details_model.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class NewDispathcDetailsProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -32,29 +31,15 @@ class NewDispathcDetailsProvider extends ChangeNotifier {
       }
 
       debugPrint('🔄 Fetching dispatch details for ID: $dispatchId');
-
-      // Get access token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('access_token');
-
-      if (token == null || token.isEmpty) {
-        errorMessage = 'No access token found';
-        debugPrint('❌ $errorMessage');
-        isLoading = false;
-        notifyListeners();
-        return false;
-      }
+      final client = AuthenticatedClient();
 
       // Make API call
       final url = Uri.parse('$baseUrl/api/v1/dispatches/$dispatchId');
       debugPrint('API URL: $url');
 
-      final response = await http.get(
+      final response = await client.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       debugPrint('Response Status: ${response.statusCode}');
