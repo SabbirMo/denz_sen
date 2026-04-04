@@ -51,7 +51,8 @@ class _SignInScreenState extends State<SignInScreen> {
     return Scaffold(
       body: Column(
         children: [
-          HeaderSection(text: 'Sign In to COP'),
+          AppSpacing.h20,
+          HeaderSection(),
           AppSpacing.h26,
           Expanded(
             child: SingleChildScrollView(

@@ -58,7 +58,8 @@ class _SignupScreenState extends State<SignupScreen> {
       resizeToAvoidBottomInset: true,
       body: Column(
         children: [
-          HeaderSection(text: 'Sign Up to COP'),
+          AppSpacing.h20,
+          HeaderSection(),
           AppSpacing.h12,
           Expanded(
             child: SingleChildScrollView(

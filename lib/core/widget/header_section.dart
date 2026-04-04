@@ -12,17 +12,17 @@ class HeaderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          width: double.infinity,
-          height: 260.h,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.white.withValues(alpha: 0.3), AppColors.white],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        // Container(
+        //   width: double.infinity,
+        //   height: 280.h,
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors: [AppColors.white.withValues(alpha: 0.3), AppColors.white],
+        //       begin: Alignment.topCenter,
+        //       end: Alignment.bottomCenter,
+        //     ),
+        //   ),
+        // ),
         SizedBox(
           height: 260.h, // image area
           child: Center(
@@ -39,7 +39,6 @@ class HeaderSection extends StatelessWidget {
             ),
           ),
         ),
-
         Positioned(
           left: 0,
           right: 0,
@@ -47,7 +46,7 @@ class HeaderSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(text ?? '', style: AppStyle.semiBook30),
+              //Text(text ?? '', style: AppStyle.semiBook30),
               Text(
                 'Stay informed. Respond faster. Collaborate \nsmarter.',
                 style: AppStyle.book16.copyWith(color: AppColors.black),
