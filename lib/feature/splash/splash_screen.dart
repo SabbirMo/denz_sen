@@ -40,12 +40,13 @@ class _SplashScreenState extends State<SplashScreen> {
     // Check authentication status first
     _checkAuthenticationStatus();
 
-    _controller = VideoPlayerController.asset('assets/video/splash_video.mp4')
-      ..initialize().then((_) {
-        setState(() => isVideoReady = true);
-        _controller.play();
-        _controller.setLooping(true);
-      });
+    _controller =
+        VideoPlayerController.asset('assets/video/animation_login.mp4')
+          ..initialize().then((_) {
+            setState(() => isVideoReady = true);
+            _controller.play();
+            _controller.setLooping(true);
+          });
   }
 
   Future<void> _checkAuthenticationStatus() async {
