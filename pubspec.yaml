@@ -49,6 +49,14 @@ dependencies:
   web_socket_channel: ^3.0.1
   firebase_core: ^4.4.0
   firebase_messaging: ^16.1.1
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons :
+  android: true
+  ios: true
+  image_path: "assets/app-logo/logo.png"
+  adaptive_icon_foreground: "assets/app-logo/logo.png"
+  adaptive_icon_background: "#ffffff"
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +88,7 @@ flutter:
     - assets/svgs/
     - assets/video/
     - assets/lottie/
+    - assets/app-logo/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -82,8 +82,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     prefixIcon: SvgPicture.asset('assets/svgs/sms.svg'),
                   ),
                   CustomField(
-                    title: 'COP ID',
-                    hintText: 'COP ID',
+                    title: 'CPIN ID',
+                    hintText: 'CPIN ID',
                     controller: _copIdController,
                     prefixIcon: SvgPicture.asset('assets/svgs/cop.svg'),
                   ),
