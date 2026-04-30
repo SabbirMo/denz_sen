@@ -71,6 +71,7 @@ class GuideViewDetailsScreen extends StatelessWidget {
                   );
                 }),
               AppSpacing.h22,
+              SizedBox(height: 60.h),
             ],
           ),
         ),

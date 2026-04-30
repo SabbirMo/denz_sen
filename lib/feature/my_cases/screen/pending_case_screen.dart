@@ -278,6 +278,23 @@ class _PendingCaseScreenState extends State<PendingCaseScreen> {
                                         Expanded(
                                           child: CustomButton(
                                             isLoading: closeCaseRef.isLoading,
+                                            buttonText: 'Activate Case',
+                                            backgroundColor: AppColors.green,
+                                            textColor: AppColors.white,
+                                            onPressed: () {
+                                              closeCaseRef.activateCase(
+                                                caseData.id,
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Consumer<CloseCasesProvider>(
+                                    builder: (context, closeCaseRef, _) =>
+                                        Expanded(
+                                          child: CustomButton(
+                                            isLoading: closeCaseRef.isLoading,
                                             buttonText: 'Close Case',
                                             backgroundColor: AppColors.border,
                                             textColor: AppColors.black,

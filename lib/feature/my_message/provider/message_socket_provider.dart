@@ -60,6 +60,48 @@ class MessageSocketProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> connectConversation(int conversationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+
+      final uri = Uri.parse('$wsBaseUrl/api/v1/chat/ws/conversation/$conversationId?token=$token');
+
+      _channel = WebSocketChannel.connect(uri);
+      isConnected = true;
+      debugPrint('🟢 WebSocket connected to: $uri');
+
+      // Listen for incoming messages
+      _channel!.stream.listen(
+        (data) {
+          _handleIncomingMessage(data);
+        },
+        onError: (error) {
+          debugPrint('❌ WebSocket error: $error');
+          errorMessage = 'Connection error: $error';
+          isConnected = false;
+          // Schedule notification for next frame to avoid build errors
+          Future.microtask(() => notifyListeners());
+        },
+        onDone: () {
+          debugPrint('🔴 WebSocket connection closed');
+          isConnected = false;
+          // Schedule notification for next frame to avoid build errors
+          Future.microtask(() => notifyListeners());
+        },
+      );
+
+      // Schedule notification for next frame to avoid build errors
+      Future.microtask(() => notifyListeners());
+    } catch (e) {
+      debugPrint('❌ WebSocket connection failed: $e');
+      errorMessage = 'Failed to connect: $e';
+      isConnected = false;
+      // Schedule notification for next frame to avoid build errors
+      Future.microtask(() => notifyListeners());
+    }
+  }
+
   // Handle incoming message
   void _handleIncomingMessage(dynamic data) {
     try {

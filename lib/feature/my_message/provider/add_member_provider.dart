@@ -10,14 +10,17 @@ class AddMemberProvider extends ChangeNotifier {
   String? errorMessage;
   List<AddMemberModel> userList = [];
 
-  Future<void> searchUsers({String query = '', required int caseId}) async {
+  Future<void> searchUsers({String query = '', int? caseId}) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
     final client = AuthenticatedClient();
 
     try {
-      final queryParams = <String, String>{'case_id': caseId.toString()};
+      final queryParams = <String, String>{};
+      if (caseId != null) {
+        queryParams['case_id'] = caseId.toString();
+      }
       if (query.isNotEmpty) {
         queryParams['query'] = query;
       }

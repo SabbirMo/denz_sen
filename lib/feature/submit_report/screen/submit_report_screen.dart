@@ -79,9 +79,9 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
     );
     if (picked != null) {
       setState(() {
-        // API expects YYYY-MM-DD format
+        // Display as MM/DD/YYYY
         _dateController.text =
-            '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+            '${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}';
       });
     }
   }
@@ -170,8 +170,12 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
       return;
     }
 
+    // Parse MM/DD/YYYY back to YYYY-MM-DD for API
+    final dateParts = _dateController.text.split('/');
+    final apiDate = '${dateParts[2]}-${dateParts[0]}-${dateParts[1]}';
+
     final success = await provider.submitReport(
-      eventDate: _dateController.text,
+      eventDate: apiDate,
       details: _detailController.text,
       actionsTaken: _actionsController.text,
       address: _addressController.text.isEmpty ? null : _addressController.text,
@@ -250,7 +254,7 @@ class _SubmitReportScreenState extends State<SubmitReportScreen> {
                   children: [
                     CustomField(
                       title: 'Date of Event *',
-                      hintText: 'YYYY-MM-DD',
+                      hintText: 'MM/DD/YYYY',
                       suffixIcon: Icon(Icons.calendar_month_outlined),
                       controller: _dateController,
                       readOnly: true,

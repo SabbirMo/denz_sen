@@ -32,8 +32,8 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isAnalyst = userRole.toLowerCase() == 'analyst';
-    final int tabLength = isAnalyst ? 3 : 2;
+    final bool canViewPending = ['analyst', 'admin', 'director'].contains(userRole.toLowerCase());
+    final int tabLength = canViewPending ? 3 : 2;
 
     return DefaultTabController(
       length: tabLength,
@@ -60,7 +60,7 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
             tabs: [
               Tab(text: 'Active'),
               Tab(text: 'Closed'),
-              if (isAnalyst) Tab(text: 'Pending'),
+              if (canViewPending) Tab(text: 'Pending'),
             ],
           ),
         ),
@@ -68,7 +68,7 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
           children: [
             ActiveCaseScreen(),
             CloseCaseScreen(),
-            if (isAnalyst) PendingCaseScreen(),
+            if (canViewPending) PendingCaseScreen(),
           ],
         ),
       ),

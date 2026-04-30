@@ -41,4 +41,29 @@ class MessageDetailsProvider extends ChangeNotifier {
       );
     }
   }
+
+  Future<List<MessageDetailsModel>> fetchConversationHistory(int conversationId) async {
+    isLoading = true;
+    notifyListeners();
+    final url = Uri.parse('$baseUrl/api/v1/chat/conversations/$conversationId/history');
+    final client = AuthenticatedClient();
+
+    try {
+      final response = await client.get(url);
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        messages = data.map((e) => MessageDetailsModel.fromJson(e)).toList();
+        return messages;
+      } else {
+        errorMessage = 'Failed to load messages: ${response.statusCode}';
+        return [];
+      }
+    } catch (e) {
+      errorMessage = 'An error occurred: $e';
+      return [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }

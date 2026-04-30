@@ -17,13 +17,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   print('🔥 Initializing Firebase Core...');
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print('✅ Firebase Core initialized');
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    print('✅ Firebase Core initialized');
 
-  // Set background message handler
-  print('📬 Setting background message handler...');
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  print('✅ Background handler set');
+    // Set background message handler
+    print('📬 Setting background message handler...');
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    print('✅ Background handler set');
+  } catch (e) {
+    print('⚠️ Firebase initialization skipped: $e');
+  }
 
   runApp(
     MultiProvider(

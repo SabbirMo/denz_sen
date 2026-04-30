@@ -13,10 +13,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class MessageDetailsPage extends StatefulWidget {
-  const MessageDetailsPage({super.key, required this.caseId, this.caseStatus});
+  const MessageDetailsPage({super.key, this.caseId, this.caseStatus, this.conversationId, this.conversationTitle});
 
-  final int caseId;
+  final int? caseId;
   final String? caseStatus;
+  final int? conversationId;
+  final String? conversationTitle;
 
   @override
   State<MessageDetailsPage> createState() => _MessageDetailsPageState();
@@ -50,23 +52,36 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
             _debounceTimer?.cancel();
             _debounceTimer = Timer(const Duration(milliseconds: 300), () {
               if (mounted) {
-                Provider.of<MessageDetailsProvider>(
-                  context,
-                  listen: false,
-                ).fetchMessageDetails(widget.caseId);
+                if (widget.caseId != null) {
+                  Provider.of<MessageDetailsProvider>(
+                    context,
+                    listen: false,
+                  ).fetchMessageDetails(widget.caseId!);
+                } else if (widget.conversationId != null) {
+                  Provider.of<MessageDetailsProvider>(
+                    context,
+                    listen: false,
+                  ).fetchConversationHistory(widget.conversationId!);
+                }
               }
             });
           }
         };
 
         // Connect to WebSocket for real-time messaging
-        _socketProvider!.connect(widget.caseId);
-
-        // Fallback: Load message history via REST API
-        Provider.of<MessageDetailsProvider>(
-          context,
-          listen: false,
-        ).fetchMessageDetails(widget.caseId);
+        if (widget.caseId != null) {
+          _socketProvider!.connect(widget.caseId!);
+          Provider.of<MessageDetailsProvider>(
+            context,
+            listen: false,
+          ).fetchMessageDetails(widget.caseId!);
+        } else if (widget.conversationId != null) {
+          _socketProvider!.connectConversation(widget.conversationId!);
+          Provider.of<MessageDetailsProvider>(
+            context,
+            listen: false,
+          ).fetchConversationHistory(widget.conversationId!);
+        }
       }
     });
   }
@@ -105,7 +120,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
                   Navigator.pop(dialogContext);
 
                   // Close the case
-                  await ref.closeCase(widget.caseId);
+                  await ref.closeCase(widget.caseId!);
 
                   // Check if widget is still mounted before using context
                   if (!mounted) return;
@@ -146,7 +161,9 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Case #${widget.caseId.toString().padLeft(5, '0')}',
+              widget.conversationId != null 
+                ? (widget.conversationTitle ?? 'Chat')
+                : 'Case #${widget.caseId?.toString().padLeft(5, '0')}',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18.sp,
@@ -185,8 +202,9 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
           ],
         ),
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.black),
+          if (widget.caseId != null)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: Colors.black),
             color: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.r),
@@ -230,7 +248,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
               if (value == 'add_member') {
                 showDialog(
                   context: context,
-                  builder: (_) => AddMemberScreen(caseId: widget.caseId),
+                  builder: (_) => AddMemberScreen(caseId: widget.caseId!),
                 );
               } else if (value == 'close_case') {
                 _closeCase();
@@ -288,10 +306,10 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
               ),
             ),
             // Show message input only if case is not closed
-            if (widget.caseStatus?.toLowerCase() != 'closed')
-              _buildMessageInput()
+            if (widget.caseId != null && widget.caseStatus?.toLowerCase() == 'closed')
+              _buildClosedCaseMessage()
             else
-              _buildClosedCaseMessage(),
+              _buildMessageInput(),
           ],
         ),
       ),
@@ -353,11 +371,20 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
     final hasFiles = _selectedFiles.isNotEmpty;
 
     // Send via REST API (for file upload support)
-    final success = await sendProvider.sendMessage(
-      caseId: widget.caseId,
-      content: messageText,
-      attachments: hasFiles ? _selectedFiles : null,
-    );
+    bool success = false;
+    if (widget.caseId != null) {
+      success = await sendProvider.sendMessage(
+        caseId: widget.caseId!,
+        content: messageText,
+        attachments: hasFiles ? _selectedFiles : null,
+      );
+    } else if (widget.conversationId != null) {
+      success = await sendProvider.sendConversationMessage(
+        conversationId: widget.conversationId!,
+        content: messageText,
+        attachments: hasFiles ? _selectedFiles : null,
+      );
+    }
 
     if (success) {
       // Clear input immediately for better UX
@@ -373,10 +400,17 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
       Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted) {
           justSentMessage = false;
-          Provider.of<MessageDetailsProvider>(
-            context,
-            listen: false,
-          ).fetchMessageDetails(widget.caseId);
+          if (widget.caseId != null) {
+            Provider.of<MessageDetailsProvider>(
+              context,
+              listen: false,
+            ).fetchMessageDetails(widget.caseId!);
+          } else if (widget.conversationId != null) {
+            Provider.of<MessageDetailsProvider>(
+              context,
+              listen: false,
+            ).fetchConversationHistory(widget.conversationId!);
+          }
         }
       });
 

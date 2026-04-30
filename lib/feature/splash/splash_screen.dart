@@ -40,13 +40,19 @@ class _SplashScreenState extends State<SplashScreen> {
     // Check authentication status first
     _checkAuthenticationStatus();
 
-    _controller =
-        VideoPlayerController.asset('assets/video/animation_login.mp4')
-          ..initialize().then((_) {
-            setState(() => isVideoReady = true);
-            _controller.play();
-            _controller.setLooping(true);
-          });
+    try {
+      _controller =
+          VideoPlayerController.asset('assets/video/animation_login.mp4')
+            ..initialize().then((_) {
+              setState(() => isVideoReady = true);
+              _controller.play();
+              _controller.setLooping(true);
+            }).catchError((e) {
+              debugPrint('⚠️ Video initialization skipped: $e');
+            });
+    } catch (e) {
+      debugPrint('⚠️ Video controller creation skipped: $e');
+    }
   }
 
   Future<void> _checkAuthenticationStatus() async {
@@ -132,20 +138,28 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Show splash screen with video if not authenticated
     return Scaffold(
-      body: isVideoReady
-          ? Stack(
-              children: [
-                // Background video
-                SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
-                    ),
-                  ),
+      backgroundColor: Colors.black, // Fallback background color
+      body: Stack(
+        children: [
+          // Background video or fallback
+          if (isVideoReady)
+            SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
                 ),
+              ),
+            )
+          else
+            SizedBox.expand(
+              child: Image.asset(
+                'assets/icons/mainIcon.png', // Optional fallback image
+                fit: BoxFit.contain,
+              ),
+            ),
 
                 // Gradient overlay + text + buttons
                 Positioned(
@@ -172,7 +186,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'CERTIFIED OBSERVER PROFESSIONAL',
+                          'CHILD PROTECTION INTELLIGENCE NETWORK',
                           style: AppStyle.boldText.copyWith(
                             fontSize: 22.sp, // responsive
                           ),
@@ -236,8 +250,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
               ],
-            )
-          : const SizedBox.expand(), // show empty until video ready
+            ),
     );
   }
 }

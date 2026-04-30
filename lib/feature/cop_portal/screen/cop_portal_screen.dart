@@ -2,6 +2,7 @@ import 'package:denz_sen/core/theme/app_colors.dart';
 import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/cop_portal/screen/cop_partal_comms_screen.dart';
 import 'package:denz_sen/feature/cop_portal/screen/cop_portal_education.dart';
+import 'package:denz_sen/feature/cop_portal/screen/cop_portal_messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -11,10 +12,10 @@ class CopPortalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('COP Portal', style: AppStyle.semiBook20),
+          title: Text('CPIN Portal', style: AppStyle.semiBook20),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_outlined),
             onPressed: () => Navigator.of(context).pop(),
@@ -35,11 +36,12 @@ class CopPortalScreen extends StatelessWidget {
             tabs: [
               Tab(text: 'Comms'),
               Tab(text: 'Education'),
+              Tab(text: 'Messages'),
             ],
           ),
         ),
         body: TabBarView(
-          children: [CopPartalCommsScreen(), CopPortalEducation()],
+          children: [CopPartalCommsScreen(), CopPortalEducation(), CopPortalMessagesScreen()],
         ),
       ),
     );

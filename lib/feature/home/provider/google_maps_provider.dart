@@ -62,4 +62,39 @@ class GoogleMapsProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  List<dynamic> activeCases = [];
+  List<dynamic> dispatches = [];
+  List<dynamic> memberLocations = [];
+
+  Future<void> fetchMapPins() async {
+    isLoading = true;
+    notifyListeners();
+    final client = AuthenticatedClient();
+
+    try {
+      // 1. Fetch Active Cases
+      final casesRes = await client.get(Uri.parse('$baseUrl/api/v1/cases/?status=Active'));
+      if (casesRes.statusCode == 200) {
+        activeCases = jsonDecode(casesRes.body);
+      }
+
+      // 2. Fetch Dispatches
+      final dispatchesRes = await client.get(Uri.parse('$baseUrl/api/v1/dispatches/'));
+      if (dispatchesRes.statusCode == 200) {
+        dispatches = jsonDecode(dispatchesRes.body);
+      }
+
+      // 3. Fetch Member Locations
+      final membersRes = await client.get(Uri.parse('$baseUrl/api/v1/users/locations'));
+      if (membersRes.statusCode == 200) {
+        memberLocations = jsonDecode(membersRes.body);
+      }
+    } catch (e) {
+      debugPrint('Error fetching map pins: $e');
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
 }

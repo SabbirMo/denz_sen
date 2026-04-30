@@ -47,4 +47,35 @@ class CloseCasesProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> activateCase(int caseId) async {
+    isLoading = true;
+    errorMessage = null;
+    success = null;
+    notifyListeners();
+    final uri = Uri.parse('$baseUrl/api/v1/cases/$caseId/status');
+    final client = AuthenticatedClient();
+
+    try {
+      debugPrint('Activating case $caseId...');
+      final response = await client.patch(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'status': 'Active'}),
+      );
+
+      if (response.statusCode == 200) {
+        success = true;
+      } else {
+        errorMessage = 'Failed to activate case: ${response.statusCode}';
+        success = false;
+      }
+    } catch (e) {
+      success = false;
+      errorMessage = 'Exception: $e';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }

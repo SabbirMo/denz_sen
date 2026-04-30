@@ -4,6 +4,7 @@ import 'package:denz_sen/core/theme/app_style.dart';
 import 'package:denz_sen/feature/my_cases/widget/case_status_widget.dart';
 import 'package:denz_sen/feature/my_message/provider/my_message_provider.dart';
 import 'package:denz_sen/feature/my_message/screen/message_details_page.dart';
+import 'package:denz_sen/feature/cop_portal/screen/create_conversation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -198,6 +199,19 @@ class _MyMessageScreenState extends State<MyMessageScreen>
             ),
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateConversationScreen()),
+          );
+          if (result == true && context.mounted) {
+            Provider.of<MyMessageProvider>(context, listen: false).fatchMessage();
+          }
+        },
+        backgroundColor: AppColors.primaryColor,
+        child: const Icon(Icons.message, color: Colors.white),
       ),
     );
   }

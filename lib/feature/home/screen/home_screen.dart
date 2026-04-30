@@ -14,6 +14,7 @@ import 'package:denz_sen/feature/my_cases/screen/my_cases_screen.dart';
 import 'package:denz_sen/feature/my_message/screen/my_message_screen.dart';
 import 'package:denz_sen/feature/setting_page/screen/setting_page.dart';
 import 'package:denz_sen/feature/submit_report/screen/submit_report_screen.dart';
+import 'package:denz_sen/feature/my_message/screen/message_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,7 +33,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   double currentValue = 0;
 
-  Set<Marker> markers = {};
+  Set<Marker> userMarkers = {};
+  Set<Marker> apiMarkers = {};
+  Set<Marker> get markers => userMarkers.union(apiMarkers);
   GoogleMapController? mapController;
   Position? currentPosition;
 
@@ -43,6 +46,67 @@ class _HomeScreenState extends State<HomeScreen> {
       _onTapGetMyLocation();
       _loadProfile();
       _loadDispatchesNearby();
+      _loadMapPins();
+    });
+  }
+
+  Future<void> _loadMapPins() async {
+    if (!mounted) return;
+    final provider = Provider.of<GoogleMapsProvider>(context, listen: false);
+    await provider.fetchMapPins();
+    if (!mounted) return;
+    
+    Set<Marker> newApiMarkers = {};
+    
+    // Add Cases
+    for (var c in provider.activeCases) {
+      if (c['latitude'] != null && c['longitude'] != null) {
+        newApiMarkers.add(Marker(
+          markerId: MarkerId('case_${c['id']}'),
+          position: LatLng(c['latitude'], c['longitude']),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          infoWindow: InfoWindow(
+            title: 'Case: ${c['case_number']}', 
+            snippet: c['title'],
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MessageDetailsPage(caseId: c['id']),
+                ),
+              );
+            },
+          ),
+        ));
+      }
+    }
+    
+    // Add Dispatches
+    for (var d in provider.dispatches) {
+      if (d['lat'] != null && d['long'] != null) {
+        newApiMarkers.add(Marker(
+          markerId: MarkerId('dispatch_${d['id']}'),
+          position: LatLng(d['lat'], d['long']),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          infoWindow: InfoWindow(title: 'Dispatch: ${d['case_number']}', snippet: d['description']),
+        ));
+      }
+    }
+    
+    // Add Members
+    for (var m in provider.memberLocations) {
+      if (m['current_lat'] != null && m['current_long'] != null) {
+        newApiMarkers.add(Marker(
+          markerId: MarkerId('member_${m['id']}'),
+          position: LatLng(m['current_lat'], m['current_long']),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          infoWindow: InfoWindow(title: 'Member: ${m['full_name']}', snippet: m['role']),
+        ));
+      }
+    }
+
+    setState(() {
+      apiMarkers = newApiMarkers;
     });
   }
 
@@ -116,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               zoom: 16,
                             ),
                             zoomControlsEnabled: false,
-                            zoomGesturesEnabled: false,
+                            zoomGesturesEnabled: true,
                             myLocationButtonEnabled: false,
                             mapToolbarEnabled: false,
                             liteModeEnabled: false,
@@ -144,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               }
 
                               setState(() {
-                                markers = {
+                                userMarkers = {
                                   Marker(
                                     markerId: MarkerId('selected-location'),
                                     position: position,
@@ -230,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           CustomGridCard(
                             imagePath: 'assets/svgs/radio.svg',
-                            title: 'COP Portal',
+                            title: 'CPIN Portal',
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => const CopPortalScreen(),
@@ -489,7 +553,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           setState(() {
             currentPosition = position;
-            markers = {
+            userMarkers = {
               Marker(
                 markerId: MarkerId('my-location'),
                 position: LatLng(position.latitude, position.longitude),

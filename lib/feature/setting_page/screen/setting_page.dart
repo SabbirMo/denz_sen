@@ -104,7 +104,7 @@ class _SettingPageState extends State<SettingPage> {
                       slotsValue: ref.profile?.fullName ?? 'user',
                     ),
                     CaseRowWidget(
-                      slotsText: 'COP ID',
+                      slotsText: 'CPIN ID',
                       slotsValue: ref.profile?.copId ?? 'A157Z239526',
                     ),
                     CaseRowWidget(
@@ -115,10 +115,7 @@ class _SettingPageState extends State<SettingPage> {
                       slotsText: 'Phone Number',
                       slotsValue: ref.profile?.phone ?? '999-222-4444',
                     ),
-                    CaseRowWidget(
-                      slotsText: 'Address',
-                      slotsValue: ref.profile?.location ?? 'address not found',
-                    ),
+
                   ],
                 ),
               ),
@@ -150,104 +147,7 @@ class _SettingPageState extends State<SettingPage> {
                   trailing: Icon(Icons.arrow_forward_ios_outlined, size: 20.w),
                 ),
               ),
-              AppSpacing.h18,
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Dispatch Range', style: AppStyle.semiBook16),
-              ),
-              AppSpacing.h10,
-              Consumer<DispatchRadiusProvider>(
-                builder: (context, provider, _) {
-                  return Column(
-                    children: [
-                      SliderTheme(
-                        data: SliderThemeData(
-                          trackHeight: 6.h,
-                          activeTrackColor: AppColors.primaryColor.withValues(
-                            alpha: 0.2,
-                          ),
-                          inactiveTrackColor: AppColors.primaryColor.withValues(
-                            alpha: 0.2,
-                          ),
-                          thumbColor: AppColors.primaryColor,
-                          thumbShape: SquareSliderThumbShape(
-                            thumbSize: 16,
-                            borderRadius: 4,
-                            thumbWidth: 24,
-                          ),
-                          overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 0,
-                          ),
-                        ),
-                        child: Slider(
-                          value: provider.dispatchRadius,
-                          min: 0,
-                          max: 500,
-                          onChanged: provider.isLoading
-                              ? null
-                              : (double newValue) {
-                                  provider.setDispatchRadius(newValue);
-                                },
-                          onChangeEnd: (double value) async {
-                            await provider.updateDispatchRadius(value);
-                            if (provider.errorMessage != null && mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(provider.errorMessage!),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      if (provider.isLoading)
-                        Padding(
-                          padding: EdgeInsets.only(top: 8.h),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 16.w,
-                                height: 16.h,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.primaryColor,
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-                              Text(
-                                'Updating...',
-                                style: AppStyle.book14.copyWith(
-                                  color: AppColors.greyText,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      AppSpacing.h10,
-                      Row(
-                        children: [
-                          Text(
-                            '${provider.dispatchRadius.toInt()} MI',
-                            style: AppStyle.semiBook14.copyWith(
-                              color: AppColors.greyText,
-                            ),
-                          ),
-                          Spacer(),
-                          Text(
-                            '500 MI',
-                            style: AppStyle.semiBook14.copyWith(
-                              color: AppColors.greyText,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              ),
-              AppSpacing.h18,
+
               DecoratedBox(
                 decoration: BoxDecoration(
                   color: AppColors.offWhite,

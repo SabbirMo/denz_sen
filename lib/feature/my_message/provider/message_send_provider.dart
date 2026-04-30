@@ -77,6 +77,59 @@ class MessageSendProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> sendConversationMessage({
+    required int conversationId,
+    required String content,
+    List<File>? attachments,
+  }) async {
+    isLoading = true;
+    errorMessage = null;
+    successMessage = null;
+    notifyListeners();
+
+    final url = Uri.parse('$baseUrl/api/v1/chat/conversations/$conversationId/messages');
+    final client = AuthenticatedClient();
+
+    try {
+      final fields = {'content': content};
+      final multipartFiles = <http.MultipartFile>[];
+      if (attachments != null && attachments.isNotEmpty) {
+        for (var file in attachments) {
+          var stream = http.ByteStream(file.openRead());
+          var length = await file.length();
+          var multipartFile = http.MultipartFile(
+            'files',
+            stream,
+            length,
+            filename: file.path.split(Platform.pathSeparator).last,
+          );
+          multipartFiles.add(multipartFile);
+        }
+      }
+
+      final response = await client.multipart(
+        'POST',
+        url,
+        fields: fields,
+        files: multipartFiles,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        successMessage = 'Message sent successfully';
+        return true;
+      } else {
+        errorMessage = 'Failed to send message: ${response.statusCode}';
+        return false;
+      }
+    } catch (e) {
+      errorMessage = 'An error occurred: $e';
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearMessages() {
     errorMessage = null;
     successMessage = null;
