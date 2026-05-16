@@ -13,9 +13,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class MessageDetailsPage extends StatefulWidget {
-  const MessageDetailsPage({super.key, this.caseId, this.caseStatus, this.conversationId, this.conversationTitle});
+  const MessageDetailsPage({super.key, this.caseId, this.caseNumber, this.caseStatus, this.conversationId, this.conversationTitle});
 
   final int? caseId;
+  final String? caseNumber;
   final String? caseStatus;
   final int? conversationId;
   final String? conversationTitle;
@@ -163,7 +164,7 @@ class _MessageDetailsPageState extends State<MessageDetailsPage> {
             Text(
               widget.conversationId != null 
                 ? (widget.conversationTitle ?? 'Chat')
-                : 'Case #${widget.caseId?.toString().padLeft(5, '0')}',
+                : (widget.caseNumber ?? 'Case #${widget.caseId?.toString().padLeft(5, '0')}'),
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18.sp,

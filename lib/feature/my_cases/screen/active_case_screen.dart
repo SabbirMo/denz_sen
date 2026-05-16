@@ -181,7 +181,10 @@ class _ActiveCaseScreenState extends State<ActiveCaseScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    MessageDetailsPage(caseId: caseData.id),
+                                    MessageDetailsPage(
+                                      caseId: caseData.id,
+                                      caseNumber: caseData.caseNumber,
+                                    ),
                               ),
                             );
                             // Auto refresh when returning from message details

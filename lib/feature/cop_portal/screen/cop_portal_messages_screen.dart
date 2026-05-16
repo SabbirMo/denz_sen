@@ -149,6 +149,7 @@ class _CopPortalMessagesScreenState extends State<CopPortalMessagesScreen> {
                                   MaterialPageRoute(
                                     builder: (context) => MessageDetailsPage(
                                       caseId: message.id,
+                                      caseNumber: message.caseNumber,
                                       caseStatus: message.caseStatus,
                                     ),
                                   ),

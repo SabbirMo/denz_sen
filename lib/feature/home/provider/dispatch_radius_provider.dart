@@ -8,7 +8,7 @@ class DispatchRadiusProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   String? successMessage;
-  double _dispatchRadius = 0.0;
+  double _dispatchRadius = 20.0;
 
   double get dispatchRadius => _dispatchRadius;
 

@@ -18,8 +18,8 @@ class MyMessageModel {
   factory MyMessageModel.fromJson(Map<String, dynamic> json) {
     return MyMessageModel(
       id: json['case_id'] ?? 0,
-      caseNumber: json['case_number'] ?? '',
-      caseStatus: json['case_status'] ?? '',
+      caseNumber: json['case_number'] ?? json['target_name'] ?? '',
+      caseStatus: json['case_status'] ?? json['target_status'] ?? '',
       lastMessage: json['last_message'] ?? '',
       lastSender: json['last_sender'] ?? '',
       lastActivity: json['last_activity'] ?? '',

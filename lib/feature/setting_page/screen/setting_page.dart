@@ -25,7 +25,7 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  double currentValue = 0;
+  double currentValue = 20;
 
   @override
   void initState() {

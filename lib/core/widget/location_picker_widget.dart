@@ -1,3 +1,4 @@
+import 'package:denz_sen/feature/submit_report/service/geocoding_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -73,16 +74,19 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
     });
 
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      final addressData = await GeocodingService().getAddressFromLatLng(
         position.latitude,
         position.longitude,
       );
 
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
+      if (addressData != null && addressData['address'] != null && addressData['address'].toString().isNotEmpty) {
+        setState(() {
+          _selectedAddress = addressData['address'];
+        });
+      } else {
         setState(() {
           _selectedAddress =
-              '${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}';
+              'Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}';
         });
       }
     } catch (e) {

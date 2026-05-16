@@ -31,7 +31,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  double currentValue = 0;
+  double currentValue = 20;
 
   Set<Marker> userMarkers = {};
   Set<Marker> apiMarkers = {};
@@ -72,7 +72,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MessageDetailsPage(caseId: c['id']),
+                  builder: (context) => MessageDetailsPage(
+                    caseId: c['id'],
+                    caseNumber: c['case_number'],
+                  ),
                 ),
               );
             },

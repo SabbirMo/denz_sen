@@ -194,7 +194,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         ),
                         AppSpacing.h6,
                         Text(
-                          'Stay informed, Respond faster.\nCollaborate smarter.',
+                          'Awareness Into Action. Intelligence Into Impact',
                           style: AppStyle.book16.copyWith(
                             color: AppColors.white,
                             fontSize: 16.sp, // responsive

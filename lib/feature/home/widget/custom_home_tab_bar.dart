@@ -70,7 +70,6 @@ class CustomHomeAppBar extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Hello 👋', style: AppStyle.medium14),
             Text(userName, style: AppStyle.medium16),
           ],
         ),
